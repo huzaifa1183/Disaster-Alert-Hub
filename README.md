@@ -207,7 +207,7 @@ Disaster-Alert-Hub/
 ### Step 1: Clone the Repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/Disaster-Alert-Hub.git
+git clone https://github.com/huzaifa1183/Disaster-Alert-Hub.git
 ```
 
 ### Step 2: Navigate to the Project
