@@ -1,0 +1,26 @@
+export const chatLanguages = [
+  { code: 'en', name: 'English', nativeName: 'English', speechCode: 'en-IN', direction: 'ltr' },
+  { code: 'hi', name: 'Hindi', nativeName: 'हिन्दी', speechCode: 'hi-IN', direction: 'ltr' },
+  { code: 'mr', name: 'Marathi', nativeName: 'मराठी', speechCode: 'mr-IN', direction: 'ltr' },
+  { code: 'bn', name: 'Bengali', nativeName: 'বাংলা', speechCode: 'bn-IN', direction: 'ltr' },
+  { code: 'gu', name: 'Gujarati', nativeName: 'ગુજરાતી', speechCode: 'gu-IN', direction: 'ltr' },
+  { code: 'pa', name: 'Punjabi', nativeName: 'ਪੰਜਾਬੀ', speechCode: 'pa-IN', direction: 'ltr' },
+  { code: 'ta', name: 'Tamil', nativeName: 'தமிழ்', speechCode: 'ta-IN', direction: 'ltr' },
+  { code: 'te', name: 'Telugu', nativeName: 'తెలుగు', speechCode: 'te-IN', direction: 'ltr' },
+  { code: 'kn', name: 'Kannada', nativeName: 'ಕನ್ನಡ', speechCode: 'kn-IN', direction: 'ltr' },
+  { code: 'ml', name: 'Malayalam', nativeName: 'മലയാളം', speechCode: 'ml-IN', direction: 'ltr' },
+  { code: 'or', name: 'Odia', nativeName: 'ଓଡ଼ିଆ', speechCode: 'or-IN', direction: 'ltr' },
+  { code: 'as', name: 'Assamese', nativeName: 'অসমীয়া', speechCode: 'as-IN', direction: 'ltr' },
+  { code: 'ur', name: 'Urdu', nativeName: 'اردو', speechCode: 'ur-IN', direction: 'rtl' },
+  { code: 'sa', name: 'Sanskrit', nativeName: 'संस्कृतम्', speechCode: 'sa-IN', direction: 'ltr' },
+  { code: 'ne', name: 'Nepali', nativeName: 'नेपाली', speechCode: 'ne-NP', direction: 'ltr' },
+  { code: 'kok', name: 'Konkani', nativeName: 'कोंकणी', speechCode: 'kok-IN', direction: 'ltr' },
+  { code: 'ks', name: 'Kashmiri', nativeName: 'कश्मीरी', speechCode: 'ks-IN', direction: 'rtl' },
+  { code: 'sd', name: 'Sindhi', nativeName: 'सिन्धी', speechCode: 'sd-IN', direction: 'rtl' },
+  { code: 'mai', name: 'Maithili', nativeName: 'मैथिली', speechCode: 'mai-IN', direction: 'ltr' },
+  { code: 'mni', name: 'Manipuri / Meitei', nativeName: 'মৈতৈলোন / ꯃꯤꯇꯩ ꯂꯣꯟ', speechCode: 'mni-IN', direction: 'ltr' },
+  { code: 'brx', name: 'Bodo', nativeName: 'बड़ो', speechCode: 'brx-IN', direction: 'ltr' },
+  { code: 'sat', name: 'Santali', nativeName: 'ᱥᱟᱱᱛᱟᱲᱤ', speechCode: 'sat-IN', direction: 'ltr' },
+]
+
+export const chatLanguageByCode = Object.fromEntries(chatLanguages.map((language) => [language.code, language]))
