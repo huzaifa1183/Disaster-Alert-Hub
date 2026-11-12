@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { z } from 'zod'
-import { createDisaster, listDisasters, removeDisaster, updateDisaster } from '../services/repository.js'
+import { createDisaster, listDisasters, removeDisaster, updateDisaster, useMockData } from '../services/repository.js'
 import { requireAdmin, requireAuth } from '../middleware/auth.js'
 
 const router = Router()
@@ -11,6 +11,7 @@ router.get('/', async (_req, res, next) => {
 })
 router.post('/', requireAuth, requireAdmin, async (req, res, next) => {
   try {
+    if (!useMockData) return res.status(503).json({ error: 'No official alert feed connected. Category administration is disabled.' })
     const parsed = categoryInput.safeParse(req.body)
     if (!parsed.success) return res.status(400).json({ error: 'Enter a category name between 2 and 60 characters.' })
     if ((await listDisasters()).some((item) => item.name.toLowerCase() === parsed.data.name.toLowerCase())) return res.status(409).json({ error: 'That category already exists.' })
@@ -19,6 +20,7 @@ router.post('/', requireAuth, requireAdmin, async (req, res, next) => {
 })
 router.put('/:id', requireAuth, requireAdmin, async (req, res, next) => {
   try {
+    if (!useMockData) return res.status(503).json({ error: 'No official alert feed connected. Category administration is disabled.' })
     const parsed = categoryInput.partial().safeParse(req.body)
     if (!parsed.success) return res.status(400).json({ error: 'Please check the category fields.' })
     const category = await updateDisaster(req.params.id, parsed.data)
@@ -28,6 +30,7 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res, next) => {
 })
 router.delete('/:id', requireAuth, requireAdmin, async (req, res, next) => {
   try {
+    if (!useMockData) return res.status(503).json({ error: 'No official alert feed connected. Category administration is disabled.' })
     const category = await removeDisaster(req.params.id)
     if (!category) return res.status(404).json({ error: 'Category not found.' })
     res.json({ success: true })

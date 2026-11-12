@@ -2,11 +2,10 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { weatherLocations } from '../../config/weatherLocations.js'
 import { normalizedAlertSchema } from '../../schemas/normalized.js'
-import { fetchOpenMeteoWeather, normalizeOpenMeteoResponse } from './openMeteo.js'
+import { buildOpenMeteoUrl, fetchOpenMeteoRaw, fetchOpenMeteoWeather, normalizeOpenMeteoResponse } from './openMeteo.js'
 
 const location = weatherLocations.find((item) => item.id === 'mumbai')
-const retrievalTime = '2026-11-12T12:00:00.000Z'
-const sourceUrl = 'https://api.open-meteo.com/v1/forecast?latitude=19.076&longitude=72.8777'
+const sourceUrl = buildOpenMeteoUrl(location).toString()
 
 function sampleResponse() {
   return {
@@ -15,57 +14,41 @@ function sampleResponse() {
       time: '2026-11-12T17:30',
       temperature_2m: 29.4,
       relative_humidity_2m: 73,
-      apparent_temperature: 33.1,
       precipitation: 0.4,
-      rain: 0.4,
-      showers: 0,
-      weather_code: 61,
-      is_day: 1,
       wind_speed_10m: 14.2,
-      wind_direction_10m: 245,
-      wind_gusts_10m: 22.8,
-    },
-    hourly: {
-      time: ['2026-11-12T17:00', '2026-11-12T18:00'],
-      temperature_2m: [29.4, 28.7],
-      precipitation_probability: [60, 70],
-      precipitation: [0.4, 1.2],
-      rain: [0.4, 1.2],
-      weather_code: [61, 63],
-      wind_speed_10m: [14.2, 13.8],
-    },
-    daily: {
-      time: ['2026-11-12', '2026-11-13'],
-      weather_code: [61, 3],
-      temperature_2m_max: [31.2, 30.4],
-      temperature_2m_min: [25.1, 24.7],
-      precipitation_sum: [8.4, 0],
-      rain_sum: [8.4, 0],
-      wind_speed_10m_max: [23.5, 18.1],
-      sunrise: ['2026-11-12T06:42', '2026-11-13T06:42'],
-      sunset: ['2026-11-12T18:01', '2026-11-13T18:01'],
+      weather_code: 61,
     },
   }
 }
 
-test('normalizes Open-Meteo current conditions and forecasts', () => {
-  const weather = normalizeOpenMeteoResponse(sampleResponse(), location, sourceUrl, retrievalTime)
+test('requests only the required current fields and Indian timezone', () => {
+  const url = buildOpenMeteoUrl(location)
+  assert.equal(url.origin + url.pathname, 'https://api.open-meteo.com/v1/forecast')
+  assert.deepEqual(Object.fromEntries(url.searchParams), {
+    latitude: String(location.latitude),
+    longitude: String(location.longitude),
+    current: 'temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m,weather_code',
+    timezone: 'Asia/Kolkata',
+  })
+})
+
+test('normalizes the returned current values and preserves the API timestamp', () => {
+  const weather = normalizeOpenMeteoResponse(sampleResponse(), location, sourceUrl)
 
   assert.equal(weather.location.city, 'Mumbai')
   assert.equal(weather.current.temperatureC, 29.4)
   assert.equal(weather.current.condition, 'Slight rain')
-  assert.equal(weather.current.isDay, true)
-  assert.equal(weather.hourlyForecast[1].precipitationProbabilityPercent, 70)
-  assert.equal(weather.dailyForecast[0].rainMm, 8.4)
+  assert.equal(weather.current.time, sampleResponse().current.time)
+  assert.equal(weather.current.windSpeedKmh, 14.2)
   assert.equal(weather.sourceUrl, sourceUrl)
-  assert.equal(weather.retrievedAt, retrievalTime)
+  assert.equal(weather.source, 'Open-Meteo')
 })
 
-test('rejects malformed or misaligned upstream forecast data', () => {
+test('rejects malformed upstream current data', () => {
   const response = sampleResponse()
-  response.hourly.wind_speed_10m.pop()
+  delete response.current.wind_speed_10m
 
-  assert.throws(() => normalizeOpenMeteoResponse(response, location, sourceUrl), /Hourly values must align/)
+  assert.throws(() => normalizeOpenMeteoResponse(response, location, sourceUrl))
 })
 
 test('fetches through the adapter and retries a transient upstream response with backoff', async () => {
@@ -88,7 +71,16 @@ test('fetches through the adapter and retries a transient upstream response with
   assert.deepEqual(delays, [20])
   assert.equal(requestedUrls[0].hostname, 'api.open-meteo.com')
   assert.equal(requestedUrls[0].searchParams.get('latitude'), String(location.latitude))
+  assert.equal(requestedUrls[0].searchParams.get('timezone'), 'Asia/Kolkata')
   assert.equal(weather.current.temperatureC, 29.4)
+})
+
+test('raw fetch returns the untouched upstream object', async () => {
+  const payload = sampleResponse()
+  const result = await fetchOpenMeteoRaw(location, {
+    fetchImpl: async () => ({ ok: true, status: 200, json: async () => payload }),
+  })
+  assert.strictEqual(result, payload)
 })
 
 test('fails after the configured attempts without making a real network call', async () => {
@@ -101,7 +93,12 @@ test('fails after the configured attempts without making a real network call', a
     maxAttempts: 2,
     retryBaseMs: 0,
     sleep: async () => {},
-  }), /HTTP 503/)
+  }), (error) => {
+    assert.match(error.message, /HTTP 503/)
+    assert.equal(error.status, 503)
+    assert.equal(error.url, sourceUrl)
+    return true
+  })
   assert.equal(attempts, 2)
 })
 
@@ -120,7 +117,7 @@ test('normalized alert schema enforces the shared verification contract', () => 
     verification_status: 'Unconfirmed',
     confidence: 0.5,
     ai_summary: null,
-    last_updated: retrievalTime,
+    last_updated: '2026-11-12T12:00:00.000Z',
   }
 
   assert.deepEqual(normalizedAlertSchema.parse(alert), alert)

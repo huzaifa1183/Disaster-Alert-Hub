@@ -1,3 +1,4 @@
+// Synthetic weather is reserved for explicitly enabled mock mode.
 export function mockWeatherForCity(city = 'Mumbai') {
   const name = String(city).trim().slice(0, 80) || 'Mumbai'
   const offset = [...name].reduce((sum, char) => sum + char.charCodeAt(0), 0) % 8

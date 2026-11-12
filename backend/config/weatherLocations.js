@@ -1,6 +1,6 @@
 export const weatherLocations = [
   { id: 'mumbai', city: 'Mumbai', district: 'Mumbai City', state: 'Maharashtra', latitude: 19.076, longitude: 72.8777, isDefault: true },
-  { id: 'delhi', city: 'New Delhi', district: 'New Delhi', state: 'Delhi', latitude: 28.6139, longitude: 77.209 },
+  { id: 'delhi', city: 'Delhi', district: 'New Delhi', state: 'Delhi', latitude: 28.6139, longitude: 77.209 },
   { id: 'bengaluru', city: 'Bengaluru', district: 'Bengaluru Urban', state: 'Karnataka', latitude: 12.9716, longitude: 77.5946 },
   { id: 'chennai', city: 'Chennai', district: 'Chennai', state: 'Tamil Nadu', latitude: 13.0827, longitude: 80.2707 },
   { id: 'kolkata', city: 'Kolkata', district: 'Kolkata', state: 'West Bengal', latitude: 22.5726, longitude: 88.3639 },

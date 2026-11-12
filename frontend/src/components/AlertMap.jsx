@@ -15,10 +15,10 @@ export default function AlertMap({ alerts, className = '' }) {
         <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         <ZoomControl position="bottomright" />
         {points.map((alert) => <CircleMarker key={alert.alertId} center={[Number(alert.latitude), Number(alert.longitude)]} radius={alert.severity === 'CRITICAL' ? 10 : 7} pathOptions={{ color: severityColor[alert.severity] || '#41657b', fillColor: severityColor[alert.severity] || '#41657b', fillOpacity: 0.86, weight: 2 }}>
-          <Popup><div className="map-popup"><div className="alert-card-top"><b>{alert.disasterType}</b><SeverityPill severity={alert.severity} /></div><strong>{alert.city}, {alert.state}</strong><p>{alert.description}</p><small>{formatTime(alert.timestamp)} · {alert.verificationStatus}</small><Link to={`/alerts/${alert.alertId}`}>View alert details →</Link></div></Popup>
+          <Popup><div className="map-popup"><div className="alert-card-top"><b>{alert.disasterType}</b><SeverityPill severity={alert.severity} /></div><strong>{alert.city}, {alert.state}</strong><p>{alert.description}</p><small>{alert.source} · {formatTime(alert.timestamp)} · {alert.verificationStatus}</small><Link to={`/alerts/${alert.alertId}`}>View alert details →</Link></div></Popup>
         </CircleMarker>)}
       </MapContainer>
-      <div className="map-demo-tag"><span /> {points.length} DEMO LOCATIONS</div>
+      <div className="map-demo-tag"><span /> {points.length} ALERT LOCATIONS</div>
     </div>
   )
 }

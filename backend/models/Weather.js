@@ -8,8 +8,8 @@ const weatherSchema = new mongoose.Schema({
   rainfall: Number,
   condition: String,
   visibility: Number,
-  source: { type: String, default: 'Mock demo forecast' },
-  observedAt: { type: Date, default: Date.now },
+  source: { type: String, required: true },
+  observedAt: { type: Date, required: true },
 }, { timestamps: true, collection: 'weather' })
 
 export default mongoose.model('Weather', weatherSchema)

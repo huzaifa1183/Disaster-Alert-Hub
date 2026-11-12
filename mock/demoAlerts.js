@@ -1,4 +1,7 @@
+// Static fictional records are loaded only when USE_MOCK_DATA=true.
 const at = (hoursAgo) => new Date(Date.now() - hoursAgo * 60 * 60 * 1000).toISOString()
+
+export const demoCategories = ['Flood', 'Heavy Rain', 'Cyclone', 'Thunderstorm', 'Heatwave', 'Lightning', 'Earthquake', 'Landslide', 'Tsunami', 'Strong Winds']
 
 export const demoAlerts = [
   { alertId: 'DAH-260927-001', title: 'Urban flooding watch for low-lying wards', disasterType: 'Flood', severity: 'CRITICAL', state: 'Maharashtra', district: 'Mumbai City', city: 'Mumbai', latitude: 19.076, longitude: 72.8777, description: 'Fictional demo alert: intense rainfall may cause waterlogging near low-lying roads and underpasses.', source: 'Demo Operations Desk', timestamp: at(0.4), verificationStatus: 'Verified', confidenceScore: 0.96, affectedArea: 'South Mumbai, Kurla and nearby low-lying wards', safetyInstructions: ['Avoid flooded roads and underpasses.', 'Move to higher ground if water enters your home.', 'Follow local emergency services guidance.'] },

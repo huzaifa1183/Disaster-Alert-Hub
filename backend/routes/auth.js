@@ -9,11 +9,12 @@ const credentials = z.object({ email: z.string().email().max(200), password: z.s
 
 router.post('/login', async (req, res, next) => {
   try {
+    if (!process.env.JWT_SECRET) return res.status(503).json({ error: 'Authentication is unavailable until JWT_SECRET is configured.' })
     const parsed = credentials.safeParse(req.body)
     if (!parsed.success) return res.status(400).json({ error: 'Enter a valid email and password (at least 8 characters).' })
     const user = await findUser(parsed.data.email)
     if (!user || !(await bcrypt.compare(parsed.data.password, user.passwordHash))) return res.status(401).json({ error: 'Email or password is incorrect.' })
-    const token = jwt.sign({ sub: user._id, email: user.email, role: user.role, name: user.name }, process.env.JWT_SECRET || 'development-only-secret-change-me', { expiresIn: '8h' })
+    const token = jwt.sign({ sub: user._id, email: user.email, role: user.role, name: user.name }, process.env.JWT_SECRET, { expiresIn: '8h' })
     res.json({ token, user: { name: user.name, email: user.email, role: user.role } })
   } catch (error) { next(error) }
 })

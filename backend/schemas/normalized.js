@@ -37,53 +37,20 @@ const weatherLocationSchema = z.object({
   longitude: finiteNumber.min(-180).max(180),
 })
 
-const weatherPointSchema = z.object({
-  time: nonEmptyString,
-  temperatureC: finiteNumber,
-  precipitationProbabilityPercent: finiteNumber.min(0).max(100),
-  precipitationMm: finiteNumber.min(0),
-  rainMm: finiteNumber.min(0),
-  weatherCode: z.number().int().min(0).max(99),
-  condition: nonEmptyString,
-  windSpeedKmh: finiteNumber.min(0),
-})
-
-const dailyForecastSchema = z.object({
-  date: nonEmptyString,
-  weatherCode: z.number().int().min(0).max(99),
-  condition: nonEmptyString,
-  temperatureMaxC: finiteNumber,
-  temperatureMinC: finiteNumber,
-  precipitationMm: finiteNumber.min(0),
-  rainMm: finiteNumber.min(0),
-  windSpeedMaxKmh: finiteNumber.min(0),
-  sunrise: nonEmptyString,
-  sunset: nonEmptyString,
-})
-
 export const normalizedWeatherSchema = z.object({
   location: weatherLocationSchema,
   timezone: nonEmptyString,
   current: z.object({
     time: nonEmptyString,
     temperatureC: finiteNumber,
-    apparentTemperatureC: finiteNumber,
     relativeHumidityPercent: finiteNumber.min(0).max(100),
     precipitationMm: finiteNumber.min(0),
-    rainMm: finiteNumber.min(0),
-    showersMm: finiteNumber.min(0),
     weatherCode: z.number().int().min(0).max(99),
     condition: nonEmptyString,
-    isDay: z.boolean(),
     windSpeedKmh: finiteNumber.min(0),
-    windDirectionDegrees: finiteNumber.min(0).max(360),
-    windGustsKmh: finiteNumber.min(0),
   }),
-  hourlyForecast: z.array(weatherPointSchema),
-  dailyForecast: z.array(dailyForecastSchema).min(1),
   source: nonEmptyString,
   sourceUrl: z.string().url(),
-  retrievedAt: dateTime,
 })
 
 /** @typedef {z.infer<typeof normalizedWeatherSchema>} NormalizedWeather */

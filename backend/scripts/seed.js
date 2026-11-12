@@ -9,14 +9,19 @@ import Weather from '../models/Weather.js'
 import Notification from '../models/Notification.js'
 import Report from '../models/Report.js'
 import ChatSession from '../models/ChatSession.js'
-import { demoAlerts } from '../../shared/demoAlerts.js'
 
+if (process.env.USE_MOCK_DATA !== 'true') throw new Error('Set USE_MOCK_DATA=true to seed mock records.')
 if (!process.env.MONGODB_URI) throw new Error('Set MONGODB_URI before running the seed script.')
+const { demoAlerts, demoCategories } = await import('../../mock/demoAlerts.js')
 await mongoose.connect(process.env.MONGODB_URI)
 await Promise.all([Alert, User, Report, Disaster, Location, Weather, Notification, ChatSession].map((model) => model.createCollection().catch(() => undefined)))
 if (await Alert.countDocuments() === 0) await Alert.insertMany(demoAlerts)
-if (await Disaster.countDocuments() === 0) await Disaster.insertMany(['Flood', 'Heavy Rain', 'Cyclone', 'Thunderstorm', 'Heatwave', 'Lightning', 'Earthquake', 'Landslide', 'Tsunami', 'Strong Winds'].map((name) => ({ name })))
-const email = (process.env.ADMIN_EMAIL || 'admin@demo.com').toLowerCase()
-if (!(await User.findOne({ email }))) await User.create({ name: 'Demo Administrator', email, role: 'admin', passwordHash: await bcrypt.hash(process.env.ADMIN_PASSWORD || 'DemoAdmin123!', 12) })
-console.log(`Database seeded with demo alerts. Admin: ${email}`)
+if (await Disaster.countDocuments() === 0) await Disaster.insertMany(demoCategories.map((name) => ({ name })))
+const email = process.env.ADMIN_EMAIL?.trim().toLowerCase()
+const password = process.env.ADMIN_PASSWORD
+if (email || password) {
+  if (!email || !password) throw new Error('Set both ADMIN_EMAIL and ADMIN_PASSWORD to configure an administrator.')
+  if (!(await User.findOne({ email }))) await User.create({ name: process.env.ADMIN_NAME?.trim() || email, email, role: 'admin', passwordHash: await bcrypt.hash(password, 12) })
+}
+console.log(`Mock data seeded. Administrator configured: ${Boolean(email)}`)
 await mongoose.disconnect()

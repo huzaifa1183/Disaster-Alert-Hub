@@ -5,29 +5,43 @@ import Report from '../models/Report.js'
 import Disaster from '../models/Disaster.js'
 import Notification from '../models/Notification.js'
 import ChatSession from '../models/ChatSession.js'
-import { demoAlerts } from '../../shared/demoAlerts.js'
 
-const demoCategories = ['Flood', 'Heavy Rain', 'Cyclone', 'Thunderstorm', 'Heatwave', 'Lightning', 'Earthquake', 'Landslide', 'Tsunami', 'Strong Winds']
 const memory = {
-  alerts: demoAlerts.map((alert) => ({ ...alert, _id: alert.alertId })),
+  alerts: [],
   users: [],
   reports: [],
-  disasters: demoCategories.map((name) => ({ _id: name, name, description: '', active: true })),
+  disasters: [],
   notifications: [],
   chatSessions: new Map(),
 }
 
+export const useMockData = process.env.USE_MOCK_DATA === 'true'
 export const isMongoConnected = () => mongoose.connection.readyState === 1
 
+export async function initializeMockData() {
+  if (!useMockData) return
+  const { demoAlerts, demoCategories } = await import('../../mock/demoAlerts.js')
+  memory.alerts = demoAlerts.map((alert) => ({ ...alert, _id: alert.alertId }))
+  memory.disasters = demoCategories.map((name) => ({ _id: name, name, description: '', active: true }))
+
+  if (isMongoConnected()) {
+    if (await Alert.countDocuments() === 0) await Alert.insertMany(demoAlerts)
+    if (await Disaster.countDocuments() === 0) await Disaster.insertMany(demoCategories.map((name) => ({ name })))
+  }
+}
+
 export async function listAlerts() {
+  if (!useMockData) return []
   return isMongoConnected() ? Alert.find().sort({ timestamp: -1 }).lean() : [...memory.alerts].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
 }
 
 export async function findAlert(id) {
+  if (!useMockData) return null
   return isMongoConnected() ? Alert.findOne({ $or: [{ alertId: id }, { _id: mongoose.isValidObjectId(id) ? id : null }] }).lean() : memory.alerts.find((alert) => alert.alertId === id || alert._id === id)
 }
 
 export async function createAlert(value) {
+  if (!useMockData) throw new Error('Alert administration is disabled while no official alert feed is connected.')
   if (isMongoConnected()) return (await Alert.create(value)).toObject()
   const alert = { ...value, _id: value.alertId, timestamp: value.timestamp || new Date().toISOString() }
   memory.alerts.unshift(alert)
@@ -35,6 +49,7 @@ export async function createAlert(value) {
 }
 
 export async function updateAlert(id, value) {
+  if (!useMockData) throw new Error('Alert administration is disabled while no official alert feed is connected.')
   if (isMongoConnected()) return Alert.findOneAndUpdate({ $or: [{ alertId: id }, { _id: mongoose.isValidObjectId(id) ? id : null }] }, value, { new: true, runValidators: true }).lean()
   const index = memory.alerts.findIndex((alert) => alert.alertId === id || alert._id === id)
   if (index < 0) return null
@@ -43,6 +58,7 @@ export async function updateAlert(id, value) {
 }
 
 export async function removeAlert(id) {
+  if (!useMockData) throw new Error('Alert administration is disabled while no official alert feed is connected.')
   if (isMongoConnected()) return Alert.findOneAndDelete({ $or: [{ alertId: id }, { _id: mongoose.isValidObjectId(id) ? id : null }] }).lean()
   const index = memory.alerts.findIndex((alert) => alert.alertId === id || alert._id === id)
   return index < 0 ? null : memory.alerts.splice(index, 1)[0]
@@ -92,10 +108,12 @@ export async function addReport(report) {
 }
 
 export async function listDisasters() {
+  if (!useMockData) return []
   return isMongoConnected() ? Disaster.find().sort({ name: 1 }).lean() : [...memory.disasters].sort((a, b) => a.name.localeCompare(b.name))
 }
 
 export async function createDisaster(value) {
+  if (!useMockData) throw new Error('Category administration is disabled while no official alert feed is connected.')
   if (isMongoConnected()) return (await Disaster.create(value)).toObject()
   const saved = { ...value, _id: value.name }
   memory.disasters.push(saved)
@@ -103,6 +121,7 @@ export async function createDisaster(value) {
 }
 
 export async function updateDisaster(id, value) {
+  if (!useMockData) throw new Error('Category administration is disabled while no official alert feed is connected.')
   if (isMongoConnected()) return Disaster.findOneAndUpdate({ $or: [{ _id: id }, { name: id }] }, value, { new: true, runValidators: true }).lean()
   const index = memory.disasters.findIndex((item) => item._id === id || item.name === id)
   if (index < 0) return null
@@ -112,6 +131,7 @@ export async function updateDisaster(id, value) {
 }
 
 export async function removeDisaster(id) {
+  if (!useMockData) throw new Error('Category administration is disabled while no official alert feed is connected.')
   if (isMongoConnected()) return Disaster.findOneAndDelete({ $or: [{ _id: id }, { name: id }] }).lean()
   const index = memory.disasters.findIndex((item) => item._id === id || item.name === id)
   return index < 0 ? null : memory.disasters.splice(index, 1)[0]
@@ -125,7 +145,9 @@ export async function createNotification(value) {
 }
 
 export async function listNotifications() {
-  return isMongoConnected() ? Notification.find().sort({ createdAt: -1 }).limit(30).lean() : memory.notifications.slice(0, 30)
+  return isMongoConnected()
+    ? Notification.find(useMockData ? {} : { type: 'report' }).sort({ createdAt: -1 }).limit(30).lean()
+    : memory.notifications.filter((item) => useMockData || item.type === 'report').slice(0, 30)
 }
 
 export async function getChatMessages(sessionId) {

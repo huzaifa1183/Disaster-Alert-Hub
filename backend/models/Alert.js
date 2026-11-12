@@ -13,7 +13,7 @@ const alertSchema = new mongoose.Schema({
   description: { type: String, required: true, maxlength: 2000 },
   source: { type: String, required: true },
   timestamp: { type: Date, default: Date.now },
-  verificationStatus: { type: String, enum: ['Verified', 'Pending', 'Unverified'], default: 'Pending' },
+  verificationStatus: { type: String, enum: ['Verified', 'Unconfirmed', 'Conflicting'], default: 'Unconfirmed' },
   confidenceScore: { type: Number, min: 0, max: 1, default: 0.5 },
   affectedArea: { type: String, default: '' },
   safetyInstructions: { type: [String], default: [] },
