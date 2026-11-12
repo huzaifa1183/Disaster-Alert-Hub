@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Bot, Check, Clock3, Languages, MessageCircle, Mic, Minus, Send, Sparkles, Square, Trash2, Volume2, X } from 'lucide-react'
+import { Bot, Check, Clock3, ExternalLink, Languages, MessageCircle, Mic, Minus, Send, Sparkles, Square, Trash2, Volume2, X } from 'lucide-react'
 import { useAlerts } from '../App.jsx'
 import { request } from '../services/api.js'
 import { formatTime } from '../utils/format.js'
@@ -18,11 +18,11 @@ const QUICK_QUESTIONS = [
 const SPEAK_LABELS = { en: 'Read aloud', hi: 'जवाब सुनें', mr: 'उत्तर ऐका', ta: 'பதிலைக் கேளுங்கள்', te: 'సమాధానం వినండి', bn: 'উত্তর শুনুন' }
 
 function newConversationId() {
-  const existing = localStorage.getItem('dah-chat-session-live-v1')
+  const existing = localStorage.getItem('dah-chat-session-live-v2')
   if (existing) return existing
   const id = globalThis.crypto?.randomUUID?.()
   if (!id) throw new Error('Secure conversation ID generation is unavailable.')
-  localStorage.setItem('dah-chat-session-live-v1', id)
+  localStorage.setItem('dah-chat-session-live-v2', id)
   return id
 }
 
@@ -37,7 +37,7 @@ function makeWelcome(language) {
 
 function initialMessages(language) {
   try {
-    const saved = JSON.parse(localStorage.getItem('dah-chat-messages-live-v1') || 'null')
+    const saved = JSON.parse(localStorage.getItem('dah-chat-messages-live-v2') || 'null')
     if (Array.isArray(saved) && saved.length) return saved
   } catch { /* Use the welcome message when stored demo history is invalid. */ }
   return [makeWelcome(language)]
@@ -71,7 +71,7 @@ export default function Chatbot() {
   const text = chatText(language)
   const selectedMeta = chatLanguages.find((item) => item.code === language) || chatLanguages[0]
 
-  useEffect(() => { localStorage.setItem('dah-chat-messages-live-v1', JSON.stringify(messages)) }, [messages])
+  useEffect(() => { localStorage.setItem('dah-chat-messages-live-v2', JSON.stringify(messages)) }, [messages])
   useEffect(() => { localStorage.setItem('dah-chat-language', selectedLanguage) }, [selectedLanguage])
   useEffect(() => { scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' }) }, [messages, typing, chatOpen, voiceStatus])
   useEffect(() => { if (chatOpen && !minimized) inputRef.current?.focus() }, [chatOpen, minimized])
@@ -244,7 +244,7 @@ export default function Chatbot() {
       setVoiceStatus('Secure conversation ID generation is unavailable.')
       return
     }
-    localStorage.setItem('dah-chat-session-live-v1', id)
+    localStorage.setItem('dah-chat-session-live-v2', id)
     setConversationId(id)
     setMessages([makeWelcome(language)])
     setInput('')
@@ -265,10 +265,10 @@ export default function Chatbot() {
 
   return <div className="chatbot-root">
     {chatOpen && !minimized && <section className="chat-window" aria-label="DisasterAssist AI chat" aria-live="polite">
-      <header className="chat-header"><span className="chat-avatar"><Bot size={21} /></span><div className="chat-title"><strong>DisasterAssist</strong><span><i className="chat-online-dot" />{mockDataEnabled ? text.online : 'Does not summarize live alerts'}</span></div><div className="chat-header-actions"><label className="chat-language-control" title={text.language}><Languages size={15} /><select aria-label={text.language} value={selectedLanguage} onChange={(event) => chooseLanguage(event.target.value)}><option value="auto">Auto detect · English</option>{chatLanguages.map((item) => <option key={item.code} value={item.code}>{item.nativeName}</option>)}</select></label><button type="button" className={voiceMode ? 'voice-mode-button voice-mode-active' : 'voice-mode-button'} title={voiceMode ? text.stopVoice : text.startVoice} aria-label={voiceMode ? text.stopVoice : text.startVoice} onClick={toggleVoiceMode}><Mic size={15} /><span>{text.voiceMode}</span></button><button type="button" title={text.clear} aria-label={text.clear} onClick={clearConversation}><Trash2 size={15} /></button><button type="button" title={text.minimize} aria-label={text.minimize} onClick={minimizeChat}><Minus size={17} /></button><button type="button" title={text.close} aria-label={text.close} onClick={closeChat}><X size={17} /></button></div></header>
-      <div className="chat-demo-note"><Sparkles size={13} /><span>{mockDataEnabled ? text.demo : 'Assistant replies are separate from official SACHET/NDMA records. Follow the linked source for live alerts.'}</span></div>
+      <header className="chat-header"><span className="chat-avatar"><Bot size={21} /></span><div className="chat-title"><strong>DisasterAssist</strong><span><i className="chat-online-dot" />{mockDataEnabled ? text.online : 'Live SACHET alert answers'}</span></div><div className="chat-header-actions"><label className="chat-language-control" title={text.language}><Languages size={15} /><select aria-label={text.language} value={selectedLanguage} onChange={(event) => chooseLanguage(event.target.value)}><option value="auto">Auto detect · English</option>{chatLanguages.map((item) => <option key={item.code} value={item.code}>{item.nativeName}</option>)}</select></label><button type="button" className={voiceMode ? 'voice-mode-button voice-mode-active' : 'voice-mode-button'} title={voiceMode ? text.stopVoice : text.startVoice} aria-label={voiceMode ? text.stopVoice : text.startVoice} onClick={toggleVoiceMode}><Mic size={15} /><span>{text.voiceMode}</span></button><button type="button" title={text.clear} aria-label={text.clear} onClick={clearConversation}><Trash2 size={15} /></button><button type="button" title={text.minimize} aria-label={text.minimize} onClick={minimizeChat}><Minus size={17} /></button><button type="button" title={text.close} aria-label={text.close} onClick={closeChat}><X size={17} /></button></div></header>
+      <div className="chat-demo-note"><Sparkles size={13} /><span>{mockDataEnabled ? text.demo : 'Answers use current SACHET CAP records and their source-provided instructions. Official record links are included with alert answers.'}</span></div>
       <div className="chat-history" ref={scrollRef} aria-label="Chat messages" dir={selectedMeta.direction}>
-        {messages.map((message, index) => <article className={`chat-message chat-${message.role}`} key={`${message.timestamp}-${index}`}><span className="message-avatar">{message.role === 'assistant' ? <Bot size={14} /> : 'You'}</span><div className="message-body"><div className="message-bubble">{message.content}</div><div className="message-meta"><time><Clock3 size={10} />{formatTime(message.timestamp)}</time>{message.role === 'assistant' && message.sources?.length > 0 && <span><Check size={10} /> {message.sources.includes('alerts') ? 'Alert data' : message.sources.includes('weather-demo') ? 'Mock weather' : 'Sample safety guide'}</span>}</div>{message.role === 'assistant' && <div className="message-voice-actions">{speakingId === index ? <button type="button" onClick={stopSpeaking} aria-label={text.stopSpeaking}><Square size={12} />{text.stopSpeaking}</button> : <button type="button" onClick={() => speakText(message.content, message.language || language, index)} aria-label={`${SPEAK_LABELS[language] || SPEAK_LABELS.en} ${index + 1}`}><Volume2 size={13} />{SPEAK_LABELS[language] || SPEAK_LABELS.en}</button>}</div>}</div></article>)}
+        {messages.map((message, index) => <article className={`chat-message chat-${message.role}`} key={`${message.timestamp}-${index}`}><span className="message-avatar">{message.role === 'assistant' ? <Bot size={14} /> : 'You'}</span><div className="message-body"><div className="message-bubble">{message.content}</div><div className="message-meta"><time><Clock3 size={10} />{formatTime(message.timestamp)}</time>{message.role === 'assistant' && message.sources?.map((source, sourceIndex) => typeof source === 'string' ? <span key={`${source}-${sourceIndex}`}><Check size={10} /> {source === 'alerts' ? 'Alert data' : source === 'weather-demo' ? 'Mock weather' : 'Safety guide'}</span> : source.url ? <a key={`${source.url}-${sourceIndex}`} href={source.url} target="_blank" rel="noreferrer"><ExternalLink size={10} />{source.name}{source.timestamp ? ` · ${source.timestamp}` : ''}</a> : <span key={`${source.name}-${sourceIndex}`}>{source.name}</span>)}</div>{message.role === 'assistant' && <div className="message-voice-actions">{speakingId === index ? <button type="button" onClick={stopSpeaking} aria-label={text.stopSpeaking}><Square size={12} />{text.stopSpeaking}</button> : <button type="button" onClick={() => speakText(message.content, message.language || language, index)} aria-label={`${SPEAK_LABELS[language] || SPEAK_LABELS.en} ${index + 1}`}><Volume2 size={13} />{SPEAK_LABELS[language] || SPEAK_LABELS.en}</button>}</div>}</div></article>)}
         {messages.length === 1 && <div className="quick-questions"><span>{text.quick}</span>{QUICK_QUESTIONS.map((item) => <button key={item.key} type="button" onClick={() => send(quickPrompt(item), item.key === 'explain' ? selectedAlertIdRef.current : undefined, selectedLanguage)}>{quickPrompt(item)}</button>)}</div>}
         {typing && <div className="chat-message chat-assistant"><span className="message-avatar"><Bot size={14} /></span><div className="message-bubble typing-bubble" aria-label={text.processing}><i /><i /><i /></div></div>}
       </div>

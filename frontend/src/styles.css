@@ -631,9 +631,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .chat-user .message-body { align-items: flex-end; }
 .message-bubble { padding: 9px 11px; border: 1px solid #e4e9eb; border-radius: 3px 10px 10px 10px; color: #3e535e; background: #fff; font-size: 10px; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
 .chat-user .message-bubble { border-color: #d5e7ec; border-radius: 10px 3px 10px 10px; color: #fff; background: #286b82; }
-.message-meta { display: flex; align-items: center; gap: 8px; padding: 0 2px; color: #99a4a9; font-size: 8px; }
-.message-meta time, .message-meta > span { display: inline-flex; align-items: center; gap: 3px; }
+.message-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding: 0 2px; color: #99a4a9; font-size: 8px; }
+.message-meta time, .message-meta > span, .message-meta > a { display: inline-flex; align-items: center; gap: 3px; }
 .message-meta > span { color: #60847a; }
+.message-meta > a { color: var(--blue); overflow-wrap: anywhere; }
 .message-voice-actions { min-height: 22px; display: flex; align-items: center; }
 .message-voice-actions button { min-height: 27px; padding: 0 7px; display: inline-flex; align-items: center; gap: 5px; border: 1px solid #dfe8ea; border-radius: 4px; color: #55727d; background: #fff; font-size: 8px; cursor: pointer; }
 .message-voice-actions button:hover { color: var(--blue); border-color: #a9c4cc; background: #f4f9fa; }
