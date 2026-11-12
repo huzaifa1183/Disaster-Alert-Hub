@@ -4,7 +4,7 @@ const alertSchema = new mongoose.Schema({
   alertId: { type: String, required: true, unique: true, index: true },
   title: { type: String, required: true, trim: true, maxlength: 160 },
   disasterType: { type: String, required: true },
-  severity: { type: String, enum: ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'], required: true },
+  severity: { type: String, enum: ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'UNKNOWN'], required: true },
   state: { type: String, required: true },
   district: { type: String, required: true },
   city: { type: String, default: '' },

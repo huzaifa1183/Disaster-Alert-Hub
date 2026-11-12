@@ -7,7 +7,7 @@ const dateTime = z.string().datetime({ offset: true })
 export const normalizedAlertSchema = z.object({
   id: nonEmptyString,
   type: nonEmptyString,
-  severity: z.enum(['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']),
+  severity: z.enum(['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'UNKNOWN']),
   location: z.object({
     state: nonEmptyString,
     district: nonEmptyString,

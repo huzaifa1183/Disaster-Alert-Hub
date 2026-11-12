@@ -19,8 +19,9 @@ export const useAlerts = () => useContext(AlertContext)
 export default function App() {
   const [alerts, setAlerts] = useState([])
   const [alertsError, setAlertsError] = useState('')
+  const [alertsWarning, setAlertsWarning] = useState('')
   const [mockDataEnabled, setMockDataEnabled] = useState(false)
-  const [officialAlertFeed, setOfficialAlertFeed] = useState('not_connected')
+  const [officialAlertFeed, setOfficialAlertFeed] = useState('connecting')
   const [connected, setConnected] = useState(false)
   const [toast, setToast] = useState(null)
   const [notifications, setNotifications] = useState([])
@@ -30,11 +31,15 @@ export default function App() {
   const refreshAlerts = async () => {
     try {
       const result = await request('/alerts')
-      if (!Array.isArray(result)) throw new Error('Alert API returned an invalid response.')
-      setAlerts(result)
+      if (!Array.isArray(result.alerts)) throw new Error('Alert API returned an invalid response.')
+      setAlerts(result.alerts)
+      setOfficialAlertFeed(result.status || 'unavailable')
+      setAlertsWarning(result.warning || '')
       setAlertsError('')
     } catch (reason) {
       setAlerts([])
+      setOfficialAlertFeed('unavailable')
+      setAlertsWarning('')
       setAlertsError(reason.message || 'Live alert data unavailable.')
     }
   }
@@ -43,9 +48,10 @@ export default function App() {
     refreshAlerts()
     request('/health').then((health) => {
       setMockDataEnabled(health.mockDataEnabled === true)
-      setOfficialAlertFeed(health.officialAlertFeed || 'not_connected')
+      if (health.mockDataEnabled === true) setOfficialAlertFeed('mock')
     }).catch(() => {})
     request('/notifications').then(setNotifications).catch(() => {})
+    const refreshTimer = window.setInterval(refreshAlerts, 60_000)
     const socket = io(API_URL.replace(/\/api$/, ''), { reconnectionAttempts: 5 })
     socket.on('connect', () => setConnected(true))
     socket.on('disconnect', () => setConnected(false))
@@ -56,7 +62,10 @@ export default function App() {
     socket.on('alert:updated', (alert) => setAlerts((current) => current.map((item) => item.alertId === alert.alertId ? alert : item)))
     socket.on('alert:deleted', (id) => setAlerts((current) => current.filter((item) => item.alertId !== id)))
     socket.on('notification:created', (notification) => setNotifications((current) => [notification, ...current.filter((item) => item._id !== notification._id)].slice(0, 30)))
-    return () => socket.close()
+    return () => {
+      window.clearInterval(refreshTimer)
+      socket.close()
+    }
   }, [])
 
   useEffect(() => {
@@ -66,7 +75,7 @@ export default function App() {
   }, [toast])
 
   return (
-    <AlertContext.Provider value={{ alerts, alertsError, refreshAlerts, mockDataEnabled, officialAlertFeed, connected, toast, setToast, notifications, setNotifications, chatOpen, setChatOpen, chatPrompt, setChatPrompt }}>
+    <AlertContext.Provider value={{ alerts, alertsError, alertsWarning, refreshAlerts, mockDataEnabled, officialAlertFeed, connected, toast, setToast, notifications, setNotifications, chatOpen, setChatOpen, chatPrompt, setChatPrompt }}>
       <Suspense fallback={<div className="page-loading" role="status">Opening workspace…</div>}><Routes>
         <Route element={<Layout />}>
           <Route index element={<Dashboard />} />

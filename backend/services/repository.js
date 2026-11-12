@@ -41,7 +41,7 @@ export async function findAlert(id) {
 }
 
 export async function createAlert(value) {
-  if (!useMockData) throw new Error('Alert administration is disabled while no official alert feed is connected.')
+  if (!useMockData) throw new Error('Alert administration is disabled because official SACHET/NDMA alerts are read-only.')
   if (isMongoConnected()) return (await Alert.create(value)).toObject()
   const alert = { ...value, _id: value.alertId, timestamp: value.timestamp || new Date().toISOString() }
   memory.alerts.unshift(alert)
@@ -49,7 +49,7 @@ export async function createAlert(value) {
 }
 
 export async function updateAlert(id, value) {
-  if (!useMockData) throw new Error('Alert administration is disabled while no official alert feed is connected.')
+  if (!useMockData) throw new Error('Alert administration is disabled because official SACHET/NDMA alerts are read-only.')
   if (isMongoConnected()) return Alert.findOneAndUpdate({ $or: [{ alertId: id }, { _id: mongoose.isValidObjectId(id) ? id : null }] }, value, { new: true, runValidators: true }).lean()
   const index = memory.alerts.findIndex((alert) => alert.alertId === id || alert._id === id)
   if (index < 0) return null
@@ -58,7 +58,7 @@ export async function updateAlert(id, value) {
 }
 
 export async function removeAlert(id) {
-  if (!useMockData) throw new Error('Alert administration is disabled while no official alert feed is connected.')
+  if (!useMockData) throw new Error('Alert administration is disabled because official SACHET/NDMA alerts are read-only.')
   if (isMongoConnected()) return Alert.findOneAndDelete({ $or: [{ alertId: id }, { _id: mongoose.isValidObjectId(id) ? id : null }] }).lean()
   const index = memory.alerts.findIndex((alert) => alert.alertId === id || alert._id === id)
   return index < 0 ? null : memory.alerts.splice(index, 1)[0]
@@ -113,7 +113,7 @@ export async function listDisasters() {
 }
 
 export async function createDisaster(value) {
-  if (!useMockData) throw new Error('Category administration is disabled while no official alert feed is connected.')
+  if (!useMockData) throw new Error('Category administration is disabled for the live SACHET/NDMA feed.')
   if (isMongoConnected()) return (await Disaster.create(value)).toObject()
   const saved = { ...value, _id: value.name }
   memory.disasters.push(saved)
@@ -121,7 +121,7 @@ export async function createDisaster(value) {
 }
 
 export async function updateDisaster(id, value) {
-  if (!useMockData) throw new Error('Category administration is disabled while no official alert feed is connected.')
+  if (!useMockData) throw new Error('Category administration is disabled for the live SACHET/NDMA feed.')
   if (isMongoConnected()) return Disaster.findOneAndUpdate({ $or: [{ _id: id }, { name: id }] }, value, { new: true, runValidators: true }).lean()
   const index = memory.disasters.findIndex((item) => item._id === id || item.name === id)
   if (index < 0) return null
@@ -131,7 +131,7 @@ export async function updateDisaster(id, value) {
 }
 
 export async function removeDisaster(id) {
-  if (!useMockData) throw new Error('Category administration is disabled while no official alert feed is connected.')
+  if (!useMockData) throw new Error('Category administration is disabled for the live SACHET/NDMA feed.')
   if (isMongoConnected()) return Disaster.findOneAndDelete({ $or: [{ _id: id }, { name: id }] }).lean()
   const index = memory.disasters.findIndex((item) => item._id === id || item.name === id)
   return index < 0 ? null : memory.disasters.splice(index, 1)[0]

@@ -19,8 +19,17 @@ export default function Layout() {
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [search, setSearch] = useState('')
   const navigate = useNavigate()
-  const { alertsError, mockDataEnabled, toast, setToast, notifications, setNotifications } = useAlerts()
+  const { alertsError, alertsWarning, mockDataEnabled, officialAlertFeed, toast, setToast, notifications, setNotifications } = useAlerts()
   const unread = notifications.filter((item) => !item.read).length
+  const feedLabel = mockDataEnabled
+    ? 'MOCK DATA ENABLED'
+    : officialAlertFeed === 'connected'
+      ? 'SACHET/NDMA CONNECTED'
+      : officialAlertFeed === 'stale'
+        ? 'SACHET/NDMA CACHED'
+        : officialAlertFeed === 'connecting'
+          ? 'CONNECTING TO SACHET/NDMA'
+          : 'SACHET/NDMA UNAVAILABLE'
 
   const submitSearch = (event) => {
     event.preventDefault()
@@ -30,7 +39,7 @@ export default function Layout() {
 
   return (
     <div className="app-shell">
-      <div className="demo-strip"><span><ShieldAlert size={14} /> {mockDataEnabled ? 'MOCK DATA ENABLED' : 'NO OFFICIAL ALERT FEED CONNECTED'}</span><span>This app supplements, and does not replace, official government warnings.{alertsError ? ' Live alert API unavailable.' : ''}</span><Link to="/about">About this project <span aria-hidden="true">↗</span></Link></div>
+      <div className="demo-strip"><span><ShieldAlert size={14} /> {feedLabel}</span><span>This app supplements, and does not replace, official government warnings.{alertsError ? ` ${alertsError}` : alertsWarning ? ` ${alertsWarning}` : ''}</span><Link to="/about">About this project <span aria-hidden="true">↗</span></Link></div>
       <header className="topbar">
         <Link className="brand" to="/" aria-label="Disaster Alert Hub home">
           <span className="brand-mark"><Activity size={21} strokeWidth={2.5} /></span>
@@ -42,8 +51,8 @@ export default function Layout() {
           <kbd>↵</kbd>
         </form>
         <div className="topbar-actions">
-          <span className={`sync-status ${mockDataEnabled ? 'is-connected' : ''}`}><span className="sync-dot" /> {alertsError ? 'API UNAVAILABLE' : mockDataEnabled ? 'MOCK DATA' : 'NO ALERT FEED'}</span>
-          <div className="notification-control"><button className="notification-button" type="button" onClick={() => setNotificationsOpen(!notificationsOpen)} aria-label={`Notifications, ${unread} unread`} aria-expanded={notificationsOpen}><Bell size={17} />{unread > 0 && <i>{unread > 9 ? '9+' : unread}</i>}</button>{notificationsOpen && <div className="notification-popover"><div className="notification-head"><div><strong>Notifications</strong><span>{unread ? `${unread} unread` : 'No new activity'}</span></div><button onClick={() => setNotifications((current) => current.map((item) => ({ ...item, read: true })))} title="Mark all read"><Check size={15} /></button></div>{notifications.length ? <div className="notification-list">{notifications.slice(0, 8).map((item) => <Link key={item._id || item.createdAt} to={item.alertId ? `/alerts/${item.alertId}` : '/admin'} onClick={() => { setNotifications((current) => current.map((entry) => entry._id === item._id ? { ...entry, read: true } : entry)); setNotificationsOpen(false) }} className={`notification-item ${item.read ? '' : 'notification-unread'}`}><span className="notification-mark"><Bell size={14} /></span><span><strong>{item.title}</strong><small>{item.message}</small><time>{item.createdAt ? formatTime(item.createdAt) : 'Just now'}</time></span></Link>)}</div> : <div className="notification-empty"><Bell size={19} /><span>No notifications yet</span><small>Official alert feed is not connected.</small></div>}<div className="notification-foot">OFFICIAL FEED NOT CONNECTED</div></div>}</div>
+          <span className={`sync-status ${mockDataEnabled || officialAlertFeed === 'connected' ? 'is-connected' : ''}`}><span className="sync-dot" /> {alertsError ? 'API UNAVAILABLE' : feedLabel}</span>
+          <div className="notification-control"><button className="notification-button" type="button" onClick={() => setNotificationsOpen(!notificationsOpen)} aria-label={`Notifications, ${unread} unread`} aria-expanded={notificationsOpen}><Bell size={17} />{unread > 0 && <i>{unread > 9 ? '9+' : unread}</i>}</button>{notificationsOpen && <div className="notification-popover"><div className="notification-head"><div><strong>Notifications</strong><span>{unread ? `${unread} unread` : 'No new activity'}</span></div><button onClick={() => setNotifications((current) => current.map((item) => ({ ...item, read: true })))} title="Mark all read"><Check size={15} /></button></div>{notifications.length ? <div className="notification-list">{notifications.slice(0, 8).map((item) => <Link key={item._id || item.createdAt} to={item.alertId ? `/alerts/${item.alertId}` : '/admin'} onClick={() => { setNotifications((current) => current.map((entry) => entry._id === item._id ? { ...entry, read: true } : entry)); setNotificationsOpen(false) }} className={`notification-item ${item.read ? '' : 'notification-unread'}`}><span className="notification-mark"><Bell size={14} /></span><span><strong>{item.title}</strong><small>{item.message}</small><time>{item.createdAt ? formatTime(item.createdAt) : 'Just now'}</time></span></Link>)}</div> : <div className="notification-empty"><Bell size={19} /><span>No notifications yet</span><small>Notifications are separate from the official alert feed.</small></div>}<div className="notification-foot">ALERT SOURCE: {feedLabel}</div></div>}</div>
           <button className="language-button" type="button" aria-label="Language selector"><span>EN</span><ChevronDown size={13} /></button>
           <Link className="admin-link" to="/admin"><ShieldCheck size={15} /> Admin</Link>
           <button className="mobile-menu-button" type="button" onClick={() => setMenuOpen(!menuOpen)} aria-label={menuOpen ? 'Close navigation' : 'Open navigation'}>{menuOpen ? <X /> : <Menu />}</button>

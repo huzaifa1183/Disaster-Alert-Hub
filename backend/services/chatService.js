@@ -5,7 +5,7 @@ export async function answerChat({ language = 'en' } = {}) {
   }
 
   return {
-    reply: 'No official alert feed is connected. Live alert and weather information is unavailable.',
+    reply: 'This assistant does not access or summarize the live SACHET/NDMA alert feed. Check the alert register and linked official records for current alerts, and follow government warnings in an emergency.',
     timestamp: new Date().toISOString(),
     sources: [],
     language: language === 'auto' ? 'en' : language,

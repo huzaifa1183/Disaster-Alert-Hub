@@ -12,7 +12,7 @@
 ## Source and terms checks (12 Nov 2026)
 
 - **Open-Meteo:** the [Terms of Use](https://open-meteo.com/en/terms) state the free API is for non-commercial use, subject to rate limits (10,000 calls/day, 5,000/hour, 600/minute), and CC-BY 4.0 attribution. Recheck current terms and add attribution before enabling it.
-- **NDMA SACHET:** [the public site](https://sachet.ndma.gov.in/) could not be retrieved in this environment (transport failure). Its feed endpoint, response format, access conditions, and reuse terms are therefore unverified. Do not invent an endpoint or mark alerts verified until these are documented.
+- **NDMA SACHET:** the published [All-India RSS feed](https://sachet.ndma.gov.in/cap_public_website/rss/rss_india.xml) is accessible and identifies its contents as public domain. The official portal's own client requests `POST /cap_public_website/FetchAllAlertDetails`; its identifiers match the RSS items, which link to individual CAP XML records. The adapter verifies these relationships before normalizing CAP content. The public RSS terms were checked; no broader API terms were found, so the implementation consumes only the publicly published alert feed and linked records.
 - **IMD:** [the public IMD site](https://mausam.imd.gov.in/) was accessible and links to a document titled “API and warnings supplied by IMD through social media and API.” Public page access does not establish API access or reuse permission; inspect that document and applicable terms before integrating. If usable access cannot be confirmed, omit the adapter and explain why in product documentation.
 - NCS/USGS and CWC are optional future sources; review their applicable access and reuse terms before any integration.
 
@@ -21,9 +21,9 @@
 Keep the existing React/Express architecture and UI, adding small, independently disableable backend source adapters. Every API response and saved alert should use a validated normalized schema. Source verification remains deterministic code; AI must never create or promote official facts. Preserve the existing demo experience only behind an explicit demo mode, never mixed into live data.
 
 1. **Open-Meteo + normalized schema (Milestone 1 complete):** add a backend adapter for current conditions/forecast, normalize and validate its data, and proxy it to the frontend. Implement usage limits, attribution, timeout/retry behavior, and focused normalizer tests.
-2. **NDMA SACHET:** first establish an official, reusable feed and its documented format. Add an adapter only from verified documentation; otherwise keep it disabled and record the blocker. Verify official alerts against source records.
-3. **Storage, cache, scheduler:** store normalized weather and alerts, add TTL caching and a 10–15 minute refresh with stale-data timestamps/warnings. Reuse MongoDB when configured; decide whether SQLite should be the local persistent default or whether the existing MongoDB/in-memory modes should remain.
-4. **Map and feed:** adapt the existing Leaflet map, feed, search, filters, and details to live normalized records; show source, issued/updated time, official link, verification state, and the prominent safety disclaimer. Ensure no demo records appear in live mode.
+2. **NDMA SACHET (connected):** the source adapter consumes the official alert list, published RSS, and CAP XML. It only marks a record verified when the public alert list and matching official CAP record agree. Expired and non-public CAP messages are excluded.
+3. **Storage, cache, scheduler (cache/scheduler connected):** normalized SACHET alerts are cached in memory for 10 minutes and refreshed on startup and by a 10-minute scheduler. On source errors, the last successful snapshot is served with a warning and expired records are filtered. Durable alert persistence is not implemented yet; restart clears this cache. Existing MongoDB/in-memory application data behavior was not replaced.
+4. **Map and feed (connected):** the existing Leaflet map, alert feed, filters, and detail view consume only API alert records; each shows the official CAP issue time and source link. Stale/unavailable states are explicit, and the safety disclaimer remains visible.
 5. **AI summary layer:** introduce a provider interface for structured, schema-validated summaries/translations/deduplication only. Compute `Verified`, `Unconfirmed`, and `Conflicting` in code from source evidence; visibly label all generated text as AI-generated.
 6. **Hardening and docs:** add tests with mocked upstream calls, error/fallback handling and logging, environment examples/ignore rules, source terms and limitations, setup/architecture/source-adapter documentation, and deployment configuration.
 
@@ -35,6 +35,12 @@ At each milestone, run the smallest relevant tests and the app/build, report ver
 - The frontend production build passes.
 - The local backend and frontend start successfully; a live Mumbai request returned current conditions and forecasts through the backend proxy.
 - The Open-Meteo source is used without a client key. Weather failures return an explicit error; stale-cache fallback is deferred to Milestone 3.
+
+### SACHET connection verification
+
+- The adapter was smoke-tested against the live SACHET alert list, RSS, and linked CAP XML in this environment. It returned source-linked official records, including CAP issue/expiry timestamps and coordinates from SACHET's published alert data.
+- Automated tests use mocked HTTP responses; they cover normalization, CAP `Unknown` severity, expiry filtering, stale-cache behavior, and upstream status/URL reporting.
+- SACHET cache and scheduler are process-memory based. Database persistence for alerts remains a follow-up; no alerts are fabricated when the source is unavailable.
 
 ## Decisions and gates before implementation
 

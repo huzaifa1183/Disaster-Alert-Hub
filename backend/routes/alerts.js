@@ -2,6 +2,7 @@ import { Router } from 'express'
 import { z } from 'zod'
 import { createAlert, createNotification, findAlert, listAlerts, removeAlert, updateAlert, useMockData } from '../services/repository.js'
 import { requireAdmin, requireAuth } from '../middleware/auth.js'
+import { sachetAlertCache } from '../services/sachetAlertCache.js'
 
 const router = Router()
 const alertInput = z.object({
@@ -15,21 +16,32 @@ const alertInput = z.object({
   safetyInstructions: z.array(z.string().max(240)).default([]),
 })
 
-router.get('/', async (_req, res, next) => {
-  try { res.json(await listAlerts()) } catch (error) { next(error) }
+router.get('/', async (_req, res) => {
+  try {
+    if (useMockData) {
+      return res.json({ alerts: await listAlerts(), source: 'mock', status: 'mock', latestAlertIssuedAt: null, warning: '' })
+    }
+    res.json(await sachetAlertCache.get())
+  } catch (error) {
+    res.status(502).json({ error: error.message || 'SACHET/NDMA alert feed is unavailable.', source: 'SACHET/NDMA' })
+  }
 })
 
-router.get('/:id', async (req, res, next) => {
+router.get('/:id', async (req, res) => {
   try {
-    const alert = await findAlert(req.params.id)
+    const alert = useMockData
+      ? await findAlert(req.params.id)
+      : (await sachetAlertCache.get()).alerts.find((item) => item.alertId === req.params.id || item._id === req.params.id)
     if (!alert) return res.status(404).json({ error: 'Alert not found.' })
     res.json(alert)
-  } catch (error) { next(error) }
+  } catch (error) {
+    res.status(502).json({ error: error.message || 'SACHET/NDMA alert feed is unavailable.', source: 'SACHET/NDMA' })
+  }
 })
 
 router.post('/', requireAuth, requireAdmin, async (req, res, next) => {
   try {
-    if (!useMockData) return res.status(503).json({ error: 'No official alert feed connected. Alert administration is disabled.' })
+    if (!useMockData) return res.status(503).json({ error: 'Official SACHET/NDMA alerts are read-only. Alert administration is disabled.' })
     const parsed = alertInput.safeParse(req.body)
     if (!parsed.success) return res.status(400).json({ error: 'Please check the alert fields.', details: parsed.error.flatten() })
     if (await findAlert(parsed.data.alertId)) return res.status(409).json({ error: 'Alert ID already exists.' })
@@ -45,7 +57,7 @@ router.post('/', requireAuth, requireAdmin, async (req, res, next) => {
 
 router.put('/:id', requireAuth, requireAdmin, async (req, res, next) => {
   try {
-    if (!useMockData) return res.status(503).json({ error: 'No official alert feed connected. Alert administration is disabled.' })
+    if (!useMockData) return res.status(503).json({ error: 'Official SACHET/NDMA alerts are read-only. Alert administration is disabled.' })
     const parsed = alertInput.partial().safeParse(req.body)
     if (!parsed.success) return res.status(400).json({ error: 'Please check the alert fields.', details: parsed.error.flatten() })
     const alert = await updateAlert(req.params.id, parsed.data)
@@ -57,7 +69,7 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res, next) => {
 
 router.delete('/:id', requireAuth, requireAdmin, async (req, res, next) => {
   try {
-    if (!useMockData) return res.status(503).json({ error: 'No official alert feed connected. Alert administration is disabled.' })
+    if (!useMockData) return res.status(503).json({ error: 'Official SACHET/NDMA alerts are read-only. Alert administration is disabled.' })
     const alert = await removeAlert(req.params.id)
     if (!alert) return res.status(404).json({ error: 'Alert not found.' })
     req.app.get('io').emit('alert:deleted', alert.alertId)
@@ -67,7 +79,7 @@ router.delete('/:id', requireAuth, requireAdmin, async (req, res, next) => {
 
 router.put('/:id/verify', requireAuth, requireAdmin, async (req, res, next) => {
   try {
-    if (!useMockData) return res.status(503).json({ error: 'No official alert feed connected. Alert verification is disabled.' })
+    if (!useMockData) return res.status(503).json({ error: 'Official SACHET/NDMA alerts cannot be manually verified or changed.' })
     const alert = await updateAlert(req.params.id, { verificationStatus: req.body.verified ? 'Verified' : 'Unconfirmed' })
     if (!alert) return res.status(404).json({ error: 'Alert not found.' })
     req.app.get('io').emit('alert:updated', alert)

@@ -2,13 +2,17 @@ import { Router } from 'express'
 import { listAlerts, listReports, listUsers, removeUser, updateAlert, updateUserRole, useMockData } from '../services/repository.js'
 import { requireAdmin, requireAuth } from '../middleware/auth.js'
 import { z } from 'zod'
+import { sachetAlertCache } from '../services/sachetAlertCache.js'
 
 const router = Router()
 router.use(requireAuth, requireAdmin)
 
 router.get('/dashboard', async (_req, res, next) => {
   try {
-    const [alerts, reports] = await Promise.all([listAlerts(), listReports()])
+    const [alerts, reports] = await Promise.all([
+      useMockData ? listAlerts() : sachetAlertCache.get().then((feed) => feed.alerts),
+      listReports(),
+    ])
     res.json({ totalAlerts: alerts.length, activeAlerts: alerts.length, verifiedAlerts: alerts.filter((alert) => alert.verificationStatus === 'Verified').length, pendingReports: reports.filter((report) => report.status === 'Pending').length, criticalAlerts: alerts.filter((alert) => alert.severity === 'CRITICAL').length })
   } catch (error) { next(error) }
 })
@@ -35,7 +39,7 @@ router.delete('/users/:id', async (req, res, next) => {
 })
 router.put('/alerts/:id/verify', async (req, res, next) => {
   try {
-    if (!useMockData) return res.status(503).json({ error: 'No official alert feed connected. Alert verification is disabled.' })
+    if (!useMockData) return res.status(503).json({ error: 'Official SACHET/NDMA alerts are read-only and cannot be manually verified.' })
     const alert = await updateAlert(req.params.id, { verificationStatus: req.body.verified ? 'Verified' : 'Unconfirmed' })
     if (!alert) return res.status(404).json({ error: 'Alert not found.' })
     req.app.get('io').emit('alert:updated', alert)

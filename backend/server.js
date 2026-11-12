@@ -23,6 +23,7 @@ import disastersRouter from './routes/disasters.js'
 import chatRouter from './routes/chat.js'
 import detectLanguageRouter from './routes/detectLanguage.js'
 import { addUser, findUser, initializeMockData, isMongoConnected, useMockData } from './services/repository.js'
+import { sachetAlertCache, startSachetAlertScheduler } from './services/sachetAlertCache.js'
 
 const app = express()
 const server = http.createServer(app)
@@ -38,7 +39,8 @@ app.get('/api/health', (_req, res) => res.json({
   status: 'ok',
   mode: isMongoConnected() ? 'mongodb' : 'memory',
   mockDataEnabled: useMockData,
-  officialAlertFeed: 'not_connected',
+  officialAlertFeed: useMockData ? 'mock' : sachetAlertCache.status().status,
+  latestAlertIssuedAt: sachetAlertCache.status().latestAlertIssuedAt,
 }))
 app.use('/api/alerts', alertsRouter)
 app.use('/api/auth', authRouter)
@@ -83,6 +85,7 @@ async function start() {
 
   const port = Number(process.env.PORT || 4000)
   server.listen(port, '0.0.0.0', () => console.log(`Disaster Alert Hub API listening on http://localhost:${port}`))
+  if (!useMockData) startSachetAlertScheduler()
 }
 
 start()
