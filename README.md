@@ -1,4 +1,6 @@
-# 🌪️ Disaster Alert Hub
+from pathlib import Path
+
+readme = r'''# 🌪️ Disaster Alert Hub
 
 ### AI-Powered Disaster Monitoring, Alert Management & Emergency Assistance Platform
 
@@ -11,7 +13,6 @@
   <img src="https://img.shields.io/badge/Node.js-Backend-339933?logo=node.js" />
   <img src="https://img.shields.io/badge/Python-FastAPI-3776AB?logo=python" />
   <img src="https://img.shields.io/badge/Tailwind-CSS-06B6D4?logo=tailwindcss" />
-  <img src="https://img.shields.io/badge/AI-DisasterAssist-purple" />
   <img src="https://img.shields.io/badge/Project-Student%20Demo-orange" />
 </p>
 
@@ -19,120 +20,59 @@
 
 ## 📌 About the Project
 
-**Disaster Alert Hub** is an AI-powered disaster information and emergency assistance platform developed as a student/demo project.
+**Disaster Alert Hub** is an independent student/demo project for exploring disaster information and emergency assistance workflows.
 
-The platform provides a centralized dashboard to explore disaster alerts, visualize affected locations, analyze emergency reports, and access disaster preparedness information.
+The platform provides a centralized dashboard to explore disaster alerts, visualize locations, review reports, and access disaster preparedness information. It combines an interactive map, a multilingual chatbot called **DisasterAssist AI**, voice assistance, and an administrative alert management system.
 
-It integrates an interactive map, an AI-powered chatbot named **DisasterAssist AI**, multilingual communication, voice assistance, and an administrative alert management system.
+> ⚠️ **Important disclaimer:** This is an independent educational demonstration project and is not affiliated with any government organization. All included alerts and weather conditions are fictional/mock data. It is not an operational emergency warning or dispatch system.
 
-The project demonstrates how Artificial Intelligence, Machine Learning concepts, web technologies, and data visualization can be combined to support disaster information workflows.
+## ✨ Features
 
-> ⚠️ **Disclaimer:** This is an independent educational demonstration project and is not affiliated with any government organization. All included alerts and weather conditions are fictional/mock data. It is not an operational emergency warning or dispatch system.
-
----
-
-## ✨ Key Features
-
-### 1. 📊 Interactive Disaster Dashboard
-- Responsive dashboard with alert statistics.
-- Severity distribution and trend visualizations.
-- Multiple disaster categories and Indian state coverage.
-- Alert verification status.
-- Search and filtering functionality.
+### 📊 Interactive Disaster Dashboard
+- Responsive dashboard with alert counts, severity and trend visualizations.
+- Fictional alert records spanning multiple Indian states, hazard types, severity levels, and verification states.
+- Search and filters for alert ID, city, state, district, disaster, severity, date, and verification status.
 - CSV export for alert records.
 
-### 2. 🗺️ Interactive Disaster Map
-- Leaflet-based interactive map.
-- Severity-based colored markers.
-- Location-specific alert information.
-- Interactive map popups.
+### 🗺️ Interactive Disaster Map
+- Leaflet map with severity-colored markers.
+- Interactive popups and filters.
 - Geographic visualization of demo disaster records.
 
-### 3. 🤖 DisasterAssist AI Chatbot
-- AI-powered disaster assistance chatbot.
-- Context-aware responses using application data.
-- Disaster preparedness recommendations.
-- Alert-related questions and answers.
-- Emergency kit guidance.
-- Mock weather information.
-- Optional OpenAI, Gemini, and Ollama-compatible integrations.
-- Deterministic demo responses without API credentials.
+### 🤖 DisasterAssist AI Chatbot
+- Alert-aware answers grounded in application data.
+- Live current weather and seven-day forecasts for configured cities, sourced from Open-Meteo.
+- Structured disaster preparedness guidance.
+- Explicit mock weather is used only when mock mode is enabled.
+- Optional OpenAI, Gemini, and local Ollama-compatible model adapters.
+- Deterministic demo responses work without AI credentials.
+- Emergency responses explain that the assistant cannot dispatch help.
 
-### 4. 🌐 Multilingual AI Assistance
+### 🌐 Multilingual Assistance
+DisasterAssist AI offers 22 language choices:
+- English, Hindi, Marathi, Bengali, Gujarati, Punjabi
+- Tamil, Telugu, Kannada, Malayalam, Odia, Assamese
+- Urdu, Sanskrit, Nepali, Konkani, Kashmiri, Sindhi
+- Maithili, Manipuri/Meitei, Bodo, and Santali
 
-Supports 22 language choices:
+Additional capabilities include automatic language/script detection, saved language preferences, browser speech input/output, and optional hands-free voice mode.
 
-- English
-- Hindi
-- Marathi
-- Bengali
-- Gujarati
-- Punjabi
-- Tamil
-- Telugu
-- Kannada
-- Malayalam
-- Odia
-- Assamese
-- Urdu
-- Sanskrit
-- Nepali
-- Konkani
-- Kashmiri
-- Sindhi
-- Maithili
-- Manipuri / Meitei
-- Bodo
-- Santali
+### 🚨 Alert and Report Management
+- Alert details with coordinates, confidence, affected area, safety guidance, and demo timeline.
+- Demo report submission and admin review.
+- JWT admin sign-in and hashed passwords.
+- Role-based access, alert CRUD, verification, user role management, and dashboard analytics.
+- Socket.IO broadcasts admin alert changes to connected browsers.
 
-Additional capabilities:
-- Automatic language detection.
-- Manual language selection.
-- Saved language preferences.
-- Multilingual chatbot interface.
+### 🧠 Optional AI Report Classifier
+The optional FastAPI heuristic classifier provides category, location, urgency, duplicate, and suspicious-content indicators. It is a rule-based demonstration, not a trained ML model or an automated emergency authority. Every result requires human review.
 
-### 5. 🎙️ Voice Assistance
-- Browser-based speech recognition.
-- Voice-based chatbot interaction.
-- Text-to-speech responses.
-- Optional hands-free Voice Mode.
-- Language-aware voice selection where supported.
-
-### 6. 🚨 Alert Management System
-- Multiple fictional disaster alert records.
-- Alert severity classification.
-- Alert verification workflow.
-- Detailed alert information.
-- Affected area and confidence information.
-- Safety guidance and demo timeline.
-- Admin-controlled alert creation, editing, and deletion.
-
-### 7. 🛡️ Admin Dashboard
-- Secure administrator authentication.
-- JWT-based authorization.
-- Role-based access control.
-- User management.
-- Alert verification.
-- Dashboard analytics.
-- Report management.
-- Real-time updates using Socket.IO.
-
-### 8. 🧠 AI-Based Report Classification
-
-Optional FastAPI-based heuristic classifier.
-
-Capabilities include:
-- Disaster category identification.
-- Location extraction.
-- Urgency estimation.
-- Duplicate report indicators.
-- Suspicious-content indicators.
-- Confidence estimation.
-- Human verification requirement.
-
-**Note:** This is a rule-based demonstration classifier, not a trained machine learning model or an automated emergency authority.
-
----
+### 🌦️ Other Features
+- City weather lookup with live Open-Meteo conditions and a seven-day forecast.
+- Expandable preparedness guides.
+- Emergency contact reference directory.
+- Express API with in-memory seed data when MongoDB is not configured.
+- Optional MongoDB persistence.
 
 ## 🛠️ Technology Stack
 
@@ -143,27 +83,23 @@ Capabilities include:
 | Routing | React Router |
 | Maps | Leaflet, React Leaflet |
 | Data Visualization | Recharts |
-| Backend | Node.js, Express.js |
-| Real-Time Communication | Socket.IO |
+| Backend | Node.js, Express |
+| Real-time communication | Socket.IO |
 | Database | MongoDB, Mongoose |
 | Authentication | JWT, bcrypt |
 | Validation | Zod |
-| AI Integration | OpenAI, Gemini, Ollama |
-| AI Classification | Python, FastAPI, Pydantic |
+| AI integrations | OpenAI, Gemini, Ollama-compatible models |
+| AI classifier | Python, FastAPI, Pydantic |
 | Icons | Lucide React |
-| Version Control | Git, GitHub |
-
----
+| Version control | Git, GitHub |
 
 ## 📁 Project Structure
 
 ```text
 Disaster-Alert-Hub/
-│
 ├── ai-service/
 │   ├── main.py
 │   └── requirements.txt
-│
 ├── backend/
 │   ├── data/
 │   ├── middleware/
@@ -174,57 +110,51 @@ Disaster-Alert-Hub/
 │   ├── .env.example
 │   ├── package.json
 │   └── server.js
-│
 ├── frontend/
-│   ├── dist/
 │   ├── src/
 │   ├── index.html
 │   ├── package.json
 │   ├── postcss.config.js
 │   ├── tailwind.config.js
 │   └── vite.config.js
-│
 ├── shared/
-│
 ├── .gitignore
 ├── package-lock.json
 ├── package.json
 └── README.md
 ```
 
----
+## ⚙️ Requirements
 
-## ⚙️ Installation & Setup
+- Node.js 20 or newer and npm.
+- MongoDB 6+ is optional; without it, the backend uses in-memory demo data.
+- Python 3.10+ is optional and only needed for the classifier.
+- Internet access is required for OpenStreetMap tiles.
+- AI provider credentials are optional.
 
-### Requirements
+## 🚀 Quick Start
 
-- Node.js 20 or newer.
-- npm.
-- MongoDB 6+ (optional).
-- Python 3.10+ (optional, for AI classifier).
-- Internet connection for OpenStreetMap tiles and optional AI integrations.
-
-### Step 1: Clone the Repository
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/huzaifa1183/Disaster-Alert-Hub.git
 ```
 
-### Step 2: Navigate to the Project
+### 2. Open the project directory
 
 ```bash
 cd Disaster-Alert-Hub
 ```
 
-### Step 3: Install Dependencies
+### 3. Install dependencies
+
+From the project root:
 
 ```bash
 npm install
 ```
 
-### Step 4: Configure Environment Variables
-
-Copy the example environment file:
+### 4. Configure environment variables
 
 **Windows PowerShell:**
 
@@ -232,95 +162,76 @@ Copy the example environment file:
 Copy-Item backend/.env.example backend/.env
 ```
 
-**Linux / macOS:**
+**Linux/macOS:**
 
 ```bash
 cp backend/.env.example backend/.env
 ```
 
-Configure the required environment variables inside `backend/.env`.
+Edit `backend/.env` if you want to configure MongoDB, authentication secrets, or an external AI provider.
 
-### Step 5: Start the Application
+### 5. Start the application
 
-Start the development server:
+From the project root:
 
 ```bash
 npm run dev
 ```
 
-Open the Vite URL displayed in your terminal, normally:
+Open the Vite URL shown in the terminal, normally:
 
 ```text
 http://localhost:5173
 ```
 
-The backend API normally runs at:
+The API normally runs at:
 
 ```text
 http://localhost:4000
 ```
 
----
+The app can show bundled demo alerts if the API is not running. Admin sign-in, report submission, persistence, and real-time updates require the backend.
 
-## 🔧 Run Services Separately
-
-### Frontend
+## ▶️ Run Services Separately
 
 ```bash
+# Frontend
 npm run dev --workspace frontend
-```
 
-### Backend
-
-```bash
+# Backend
 npm run dev --workspace backend
-```
 
-### Production Build
-
-```bash
+# Production frontend build
 npm run build
 ```
 
----
-
 ## 🐍 Optional AI Classifier Setup
 
-Navigate to the AI service directory:
+From the project root:
 
 ```bash
 cd ai-service
-```
-
-Create a Python virtual environment:
-
-```bash
 python -m venv .venv
 ```
 
 Activate the environment.
 
-**Windows:**
+**Windows PowerShell:**
 
 ```powershell
 .\.venv\Scripts\Activate.ps1
 ```
 
-**Linux / macOS:**
+**Linux/macOS:**
 
 ```bash
 source .venv/bin/activate
 ```
 
-Install dependencies:
+Install dependencies and start the classifier:
 
 ```bash
 pip install -r requirements.txt
-```
-
-Start the FastAPI server:
-
-```bash
 uvicorn main:app --reload --port 8000
 ```
 
@@ -330,13 +241,13 @@ Health check:
 http://localhost:8000/health
 ```
 
-The classifier accepts POST requests at:
+Classifier endpoint:
 
 ```text
-http://localhost:8000/analyze
+POST http://localhost:8000/analyze
 ```
 
-Example request:
+Example JSON request:
 
 ```json
 {
@@ -345,118 +256,85 @@ Example request:
 }
 ```
 
-The classifier returns event, location, severity, confidence, duplicate, suspicious, and verification-related indicators.
-
-All classification results require human review.
-
----
+The classifier returns event, location, severity, confidence, duplicate, suspicious, verification requirement, extracted date, and method indicators. It does not automatically publish an alert; every result requires human review.
 
 ## 🔐 Environment Configuration
 
+The backend reads configuration from `backend/.env`.
+
 | Variable | Default | Description |
 |---|---|---|
-| `PORT` | `4000` | Backend server port |
-| `CLIENT_ORIGIN` | `http://localhost:5173` | Allowed frontend origins |
-| `JWT_SECRET` | Development fallback | JWT authentication secret |
-| `ADMIN_EMAIL` | `admin@demo.com` | Demo administrator email |
-| `ADMIN_PASSWORD` | `DemoAdmin123!` | Demo administrator password |
-| `MONGODB_URI` | Unset | MongoDB connection string |
-| `VITE_API_URL` | `http://localhost:4000/api` | Frontend API URL |
-| `AI_PROVIDER` | `demo` | AI provider selection |
-| `AI_API_KEY` | Unset | Backend-only AI API key |
-| `AI_MODEL` | Provider default | Optional AI model |
-| `AI_BASE_URL` | Ollama endpoint | Local AI endpoint |
+| `PORT` | `4000` | Express API and Socket.IO port |
+| `CLIENT_ORIGIN` | `http://localhost:5173` | Allowed browser origins |
+| `JWT_SECRET` | Development fallback | Secret used to sign tokens; replace it |
+| `ADMIN_EMAIL` | `admin@demo.com` | Seeded demo admin email |
+| `ADMIN_PASSWORD` | `DemoAdmin123!` | Seeded demo admin password |
+| `MONGODB_URI` | Unset | Optional MongoDB connection string |
+| `VITE_API_URL` | `http://localhost:4000/api` | Optional frontend API base URL |
+| `AI_PROVIDER` | `demo` | `demo`, `openai`, `gemini`, or `local` |
+| `AI_API_KEY` | Unset | Backend-only provider key |
+| `AI_MODEL` | Provider default | Optional model name |
+| `AI_BASE_URL` | `http://localhost:11434/api/chat` | Local Ollama-compatible endpoint |
 
-Supported AI providers:
+Never put provider keys in frontend code or `VITE_` variables. Do not commit `.env` files.
 
-- `demo`
-- `openai`
-- `gemini`
-- `local`
+Without `MONGODB_URI`, data is stored in memory and resets when the backend restarts. To use MongoDB, configure the connection string and restart the API.
 
-Never expose API keys in frontend code or upload `.env` files to GitHub.
+The standalone seed command is:
 
----
+```bash
+npm run seed --workspace backend
+```
+
+It requires `MONGODB_URI`.
 
 ## 👨‍💻 Admin Demo Access
 
-For local demonstration:
+For local demonstration only:
 
-| Field | Demo Credentials |
+| Field | Demo value |
 |---|---|
 | Email | `admin@demo.com` |
 | Password | `DemoAdmin123!` |
 
-**Security:** These are demonstration credentials only. Change the default credentials and JWT secret before any deployment. Never use demo credentials in a public production environment.
+Change the default credentials and set a strong `JWT_SECRET` before exposing the service. The demo account is created on backend startup if it does not already exist.
 
----
+## 🔌 API Overview
 
-## 🔌 API Documentation
+All backend routes are prefixed with `/api`.
 
-All backend API routes are prefixed with:
+| Method | Endpoint | Access | Purpose |
+|---|---|---|---|
+| GET | `/health` | Public | API and storage mode |
+| GET | `/alerts` | Public | List alert records |
+| GET | `/alerts/:id` | Public | Fetch alert details |
+| POST | `/alerts` | Admin | Create an alert |
+| PUT | `/alerts/:id` | Admin | Edit an alert |
+| DELETE | `/alerts/:id` | Admin | Remove an alert |
+| GET | `/disasters` | Public | List disaster categories |
+| POST | `/disasters` | Admin | Add a category |
+| PUT | `/disasters/:id` | Admin | Update a category |
+| DELETE | `/disasters/:id` | Admin | Remove a category |
+| GET | `/weather?city=Mumbai` | Public | Live Open-Meteo current conditions and seven-day forecast |
+| GET | `/locations` | Public | Locations derived from alerts |
+| GET | `/reports` | Public | List demo reports |
+| POST | `/reports` | Public | Submit a demo report |
+| GET | `/notifications` | Public | Notification feed |
+| POST | `/chat` | Public | Ask DisasterAssist AI |
+| POST | `/detect-language` | Public | Detect a supported language |
+| POST | `/auth/login` | Public | Login and receive JWT |
+| POST | `/auth/register` | Public | Register a normal user |
+| GET | `/admin/dashboard` | Admin | Dashboard statistics |
+| GET | `/admin/users` | Admin | List users |
+| PUT | `/admin/users/:id/role` | Admin | Change a user's role |
+| DELETE | `/admin/users/:id` | Admin | Remove a user |
+| PUT | `/admin/alerts/:id/verify` | Admin | Verify or unverify an alert |
 
-```text
-/api
-```
+Admin routes require `Authorization: Bearer <JWT>` and the admin role.
 
-### Alert APIs
+## ⚡ Real-Time Events
 
-| Method | Endpoint | Purpose |
-|---|---|---|
-| GET | `/alerts` | Get all alerts |
-| GET | `/alerts/:id` | Get alert details |
-| POST | `/alerts` | Create alert (Admin) |
-| PUT | `/alerts/:id` | Update alert (Admin) |
-| DELETE | `/alerts/:id` | Delete alert (Admin) |
-
-### Disaster APIs
-
-| Method | Endpoint | Purpose |
-|---|---|---|
-| GET | `/disasters` | List disaster categories |
-| POST | `/disasters` | Add category (Admin) |
-| PUT | `/disasters/:id` | Update category (Admin) |
-| DELETE | `/disasters/:id` | Delete category (Admin) |
-
-### User & Authentication APIs
-
-| Method | Endpoint | Purpose |
-|---|---|---|
-| POST | `/auth/login` | User login |
-| POST | `/auth/register` | User registration |
-| GET | `/admin/users` | List users (Admin) |
-| PUT | `/admin/users/:id/role` | Change user role (Admin) |
-| DELETE | `/admin/users/:id` | Delete user (Admin) |
-
-### AI & Chatbot APIs
-
-| Method | Endpoint | Purpose |
-|---|---|---|
-| POST | `/chat` | Chat with DisasterAssist AI |
-| POST | `/detect-language` | Detect supported language |
-
-### Other APIs
-
-| Method | Endpoint | Purpose |
-|---|---|---|
-| GET | `/health` | Backend health |
-| GET | `/weather` | Mock weather information |
-| GET | `/locations` | Get alert locations |
-| GET | `/reports` | Get reports |
-| POST | `/reports` | Submit demo report |
-| GET | `/notifications` | Get notifications |
-| GET | `/admin/dashboard` | Admin analytics |
-| PUT | `/admin/alerts/:id/verify` | Verify an alert (Admin) |
-
-Admin routes require JWT authentication and the appropriate admin role.
-
----
-
-## ⚡ Real-Time Features
-
-The application uses Socket.IO for real-time communication.
-
-Supported events:
+Socket.IO runs on the backend port. Connected clients can receive:
 
 - `connection:ready`
 - `alert:created`
@@ -464,116 +342,70 @@ Supported events:
 - `alert:deleted`
 - `report:created`
 
-These events broadcast application changes to connected browsers. They do not represent a live government emergency information feed.
+These events communicate application changes. They are not a live emergency data feed.
 
----
+## 🗄️ Data Model
 
-## 🗄️ Database
+When MongoDB is configured, the application uses collections for users, alerts, reports, disasters, locations, weather, notifications, and chat sessions.
 
-MongoDB persistence is optional.
+Alert records can contain an alert ID, title, disaster type, severity, state, district, city, coordinates, description, source, timestamp, verification status, confidence score, affected area, and safety instructions.
 
-Supported collections include:
+## 🤖 DisasterAssist AI
 
-- Users
-- Alerts
-- Reports
-- Disasters
-- Locations
-- Weather
-- Notifications
-- Chat Sessions
-
-Without MongoDB configuration, the backend uses in-memory demonstration data. Changes are lost when the backend restarts.
-
-To initialize MongoDB demo data:
-
-```bash
-npm run seed --workspace backend
-```
-
-This requires a configured `MONGODB_URI`.
-
----
-
-## 🤖 About DisasterAssist AI
-
-DisasterAssist AI is the integrated chatbot available throughout the application.
-
-It helps users explore fictional disaster alerts, access preparedness information, and understand the safety guidance included in the application.
+DisasterAssist AI uses current SACHET/NDMA alert records, live Open-Meteo weather and forecast data for configured cities, and structured disaster safety knowledge. It asks for a city when one is not specified; it does not guess live conditions.
 
 Example questions:
 
-- What alerts are active?
-- Show alerts near Mumbai.
-- What should I do during a flood?
-- What should I keep in an emergency kit?
-- What is the weather in Chennai?
-- मुंबई में कोई अलर्ट है?
-- बाढ़ के समय मुझे क्या करना चाहिए?
+- `What alerts are active?`
+- `Show alerts near Mumbai`
+- `What should I do during a flood?`
+- `What should I keep in an emergency kit?`
+- `What is the weather in Chennai?`
+- `Will it rain tomorrow in Mumbai?`
+- `मुंबई में कोई अलर्ट है?`
+- `बाढ़ के समय मुझे क्या करना चाहिए?`
+- `मुंबईमध्ये काही अलर्ट आहे का?`
 
-The chatbot can use deterministic demo responses or optional external AI providers.
+Alert lists and location lookups are deterministic. The chatbot does not treat missing location matches as proof that an area is safe.
 
-It cannot dispatch emergency assistance or verify real-world emergency conditions.
+The browser speech features use the Web Speech API and SpeechSynthesis where supported. Microphone access is requested only after the user activates a voice control. Browser support and installed language voices vary; use HTTPS or localhost for microphone access.
 
----
+The default `demo` provider requires no API key. Optional providers can be configured using backend environment variables. Model-generated content should not be treated as verified emergency advice.
 
-## 🔒 Security & Safety
+## 🔒 Safety and Security Notes
 
-The project includes:
-
-- Helmet security middleware.
-- CORS origin restrictions.
-- JWT-based authentication.
-- Password hashing using bcrypt.
-- Role-based authorization.
-- Zod input validation.
-- API rate limiting.
-- JSON request size limits.
-
-Before deployment:
-
-- Use HTTPS.
-- Configure strong secrets.
-- Protect API credentials.
-- Replace demo administrator credentials.
-- Configure persistent database storage.
-- Implement appropriate audit logging.
-- Verify emergency information using official sources.
-
----
+- This prototype is not an emergency notification or dispatch system.
+- Weather answers use Open-Meteo model data and are not official warnings. Explicit mock mode uses fictional/demo weather instead.
+- Contact numbers and preparedness guidance are reference information; verify current local information through official channels.
+- The classifier is heuristic and requires human review.
+- In-memory storage is temporary; configure MongoDB for persistence.
+- Use HTTPS, strong secrets, managed credentials, appropriate rate limits, and audit logging before deployment.
+- Socket.IO events are demo application records, not an authenticated emergency data feed.
 
 ## 🎯 Project Objectives
 
 1. Explore how AI can support disaster information workflows.
 2. Build a centralized disaster alert dashboard.
-3. Demonstrate geographical disaster visualization.
-4. Explore multilingual AI-powered assistance.
-5. Demonstrate automated report classification.
-6. Provide an administrative alert verification workflow.
-7. Combine frontend, backend, database, and AI technologies into one platform.
-
----
+3. Demonstrate geographic visualization of alert records.
+4. Explore multilingual and voice-enabled AI assistance.
+5. Demonstrate heuristic report classification and human review.
+6. Combine frontend, backend, database, and AI technologies in one platform.
 
 ## 🚀 Future Enhancements
 
-Potential future development directions:
-
 - Integration with verified official disaster information APIs.
-- Real-time weather data integration.
+- Live weather data integration.
 - Improved machine learning-based report classification.
-- Duplicate and misinformation detection improvements.
-- Advanced geospatial analytics.
-- More regional language support.
+- Advanced duplicate and suspicious-report analysis.
+- Enhanced geospatial analytics.
+- Expanded regional language support.
 - Mobile application development.
-- Improved notification and subscription systems.
 
-These are potential enhancements, not claims of existing functionality.
-
----
+These are potential future improvements, not claims of existing functionality.
 
 ## 🤝 Contributing
 
-Contributions and suggestions are welcome.
+Contributions, suggestions, and improvements are welcome.
 
 1. Fork the repository.
 2. Create a feature branch.
@@ -581,20 +413,19 @@ Contributions and suggestions are welcome.
 4. Commit your changes.
 5. Submit a pull request.
 
----
-
 ## 📜 License
 
-This project is developed for educational, demonstration, and research purposes.
-
-Add an appropriate open-source license before granting reuse permissions.
+This project is developed for educational, demonstration, and research purposes. Add an appropriate open-source license before granting reuse permissions.
 
 ---
 
 <p align="center">
-  <strong>🌪️ Disaster Alert Hub</strong>
-  <br/>
-  AI-Powered Disaster Monitoring & Emergency Assistance
-  <br/><br/>
+  <strong>🌪️ Disaster Alert Hub</strong><br />
+  AI-Powered Disaster Monitoring & Emergency Assistance<br /><br />
   <em>Built with ❤️ using AI, Data Science & Web Technologies.</em>
 </p>
+'''
+
+path = Path("/mnt/data/README.md")
+path.write_text(readme, encoding="utf-8")
+print(f"Created {path} ({len(readme.splitlines())} lines)")

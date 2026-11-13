@@ -13,6 +13,14 @@ const openMeteoResponseSchema = z.object({
     wind_speed_10m: z.number().min(0),
     weather_code: z.number().int().min(0).max(99),
   }),
+  daily: z.object({
+    time: z.array(z.string().min(1)),
+    weather_code: z.array(z.number().int().min(0).max(99)),
+    temperature_2m_max: z.array(finiteNumber),
+    temperature_2m_min: z.array(finiteNumber),
+    precipitation_probability_max: z.array(z.number().min(0).max(100)),
+    precipitation_sum: z.array(z.number().min(0)),
+  }),
 })
 
 const conditionByCode = new Map([
@@ -56,6 +64,8 @@ export function buildOpenMeteoUrl(location) {
     latitude: String(location.latitude),
     longitude: String(location.longitude),
     current: 'temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m,weather_code',
+    daily: 'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum',
+    forecast_days: '7',
     timezone: 'Asia/Kolkata',
   }).toString()
   return url
@@ -63,6 +73,18 @@ export function buildOpenMeteoUrl(location) {
 
 export function normalizeOpenMeteoResponse(payload, location, sourceUrl) {
   const response = openMeteoResponseSchema.parse(payload)
+  const forecastLength = response.daily.time.length
+  const dailyFields = [
+    response.daily.weather_code,
+    response.daily.temperature_2m_max,
+    response.daily.temperature_2m_min,
+    response.daily.precipitation_probability_max,
+    response.daily.precipitation_sum,
+  ]
+  if (!forecastLength || dailyFields.some((values) => values.length !== forecastLength)) {
+    throw new TypeError('Open-Meteo returned incomplete daily forecast data.')
+  }
+
   const normalized = {
     location: {
       id: location.id,
@@ -82,6 +104,15 @@ export function normalizeOpenMeteoResponse(payload, location, sourceUrl) {
       condition: weatherCondition(response.current.weather_code),
       windSpeedKmh: response.current.wind_speed_10m,
     },
+    dailyForecast: response.daily.time.map((date, index) => ({
+      date,
+      weatherCode: response.daily.weather_code[index],
+      condition: weatherCondition(response.daily.weather_code[index]),
+      maximumTemperatureC: response.daily.temperature_2m_max[index],
+      minimumTemperatureC: response.daily.temperature_2m_min[index],
+      precipitationProbabilityPercent: response.daily.precipitation_probability_max[index],
+      precipitationMm: response.daily.precipitation_sum[index],
+    })),
     source: 'Open-Meteo',
     sourceUrl,
   }

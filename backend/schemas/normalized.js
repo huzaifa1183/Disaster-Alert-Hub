@@ -49,6 +49,15 @@ export const normalizedWeatherSchema = z.object({
     condition: nonEmptyString,
     windSpeedKmh: finiteNumber.min(0),
   }),
+  dailyForecast: z.array(z.object({
+    date: nonEmptyString,
+    weatherCode: z.number().int().min(0).max(99),
+    condition: nonEmptyString,
+    maximumTemperatureC: finiteNumber,
+    minimumTemperatureC: finiteNumber,
+    precipitationProbabilityPercent: finiteNumber.min(0).max(100),
+    precipitationMm: finiteNumber.min(0),
+  })).min(1),
   source: nonEmptyString,
   sourceUrl: z.string().url(),
 })

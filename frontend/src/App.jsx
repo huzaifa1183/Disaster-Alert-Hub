@@ -1,4 +1,4 @@
-import { createContext, lazy, Suspense, useContext, useEffect, useState } from 'react'
+import { createContext, lazy, Suspense, useContext, useEffect, useRef, useState } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { io } from 'socket.io-client'
 import { request, API_URL } from './services/api.js'
@@ -25,8 +25,10 @@ export default function App() {
   const [connected, setConnected] = useState(false)
   const [toast, setToast] = useState(null)
   const [notifications, setNotifications] = useState([])
+  const [reportUpdates, setReportUpdates] = useState(0)
   const [chatOpen, setChatOpen] = useState(false)
   const [chatPrompt, setChatPrompt] = useState(null)
+  const notificationsLoaded = useRef(false)
 
   const refreshAlerts = async () => {
     try {
@@ -44,14 +46,29 @@ export default function App() {
     }
   }
 
+  const refreshNotifications = async () => {
+    try {
+      const items = await request('/notifications')
+      if (!Array.isArray(items)) throw new Error('Notification API returned an invalid response.')
+      const hasLoadedNotifications = notificationsLoaded.current
+      setNotifications((current) => items.map((item) => ({
+        ...item,
+        read: current.find((existing) => existing._id === item._id)?.read ?? !hasLoadedNotifications,
+      })))
+      notificationsLoaded.current = true
+    } catch {
+      setNotifications([])
+    }
+  }
+
   useEffect(() => {
     refreshAlerts()
     request('/health').then((health) => {
       setMockDataEnabled(health.mockDataEnabled === true)
       if (health.mockDataEnabled === true) setOfficialAlertFeed('mock')
     }).catch(() => {})
-    request('/notifications').then(setNotifications).catch(() => {})
-    const refreshTimer = window.setInterval(refreshAlerts, 60_000)
+    refreshNotifications()
+    const refreshTimer = window.setInterval(() => { refreshAlerts(); refreshNotifications() }, 60_000)
     const socket = io(API_URL.replace(/\/api$/, ''), { reconnectionAttempts: 5 })
     socket.on('connect', () => setConnected(true))
     socket.on('disconnect', () => setConnected(false))
@@ -61,7 +78,7 @@ export default function App() {
     })
     socket.on('alert:updated', (alert) => setAlerts((current) => current.map((item) => item.alertId === alert.alertId ? alert : item)))
     socket.on('alert:deleted', (id) => setAlerts((current) => current.filter((item) => item.alertId !== id)))
-    socket.on('notification:created', (notification) => setNotifications((current) => [notification, ...current.filter((item) => item._id !== notification._id)].slice(0, 30)))
+    socket.on('community:reports-updated', () => setReportUpdates((current) => current + 1))
     return () => {
       window.clearInterval(refreshTimer)
       socket.close()
@@ -75,7 +92,7 @@ export default function App() {
   }, [toast])
 
   return (
-    <AlertContext.Provider value={{ alerts, alertsError, alertsWarning, refreshAlerts, mockDataEnabled, officialAlertFeed, connected, toast, setToast, notifications, setNotifications, chatOpen, setChatOpen, chatPrompt, setChatPrompt }}>
+    <AlertContext.Provider value={{ alerts, alertsError, alertsWarning, refreshAlerts, mockDataEnabled, officialAlertFeed, connected, toast, setToast, notifications, setNotifications, reportUpdates, chatOpen, setChatOpen, chatPrompt, setChatPrompt }}>
       <Suspense fallback={<div className="page-loading" role="status">Opening workspace…</div>}><Routes>
         <Route element={<Layout />}>
           <Route index element={<Dashboard />} />

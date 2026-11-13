@@ -1,11 +1,17 @@
 import { Router } from 'express'
-import { listAlerts, listReports, listUsers, removeUser, updateAlert, updateUserRole, useMockData } from '../services/repository.js'
+import { clearReports, listAlerts, listReports, listUsers, removeUser, updateAlert, updateReport, updateUserRole, useMockData } from '../services/repository.js'
 import { requireAdmin, requireAuth } from '../middleware/auth.js'
 import { z } from 'zod'
 import { sachetAlertCache } from '../services/sachetAlertCache.js'
 
 const router = Router()
 router.use(requireAuth, requireAdmin)
+const reportUpdateInput = z.object({
+  text: z.string().trim().min(10).max(2000).optional(),
+  location: z.string().trim().max(120).optional(),
+  category: z.string().trim().max(80).optional(),
+  status: z.enum(['Pending', 'Verified', 'Rejected', 'Reviewed']).optional(),
+}).strict().refine((value) => Object.keys(value).length > 0, { message: 'Provide at least one report field to update.' })
 
 router.get('/dashboard', async (_req, res, next) => {
   try {
@@ -18,6 +24,27 @@ router.get('/dashboard', async (_req, res, next) => {
 })
 router.get('/users', async (_req, res, next) => {
   try { res.json(await listUsers()) } catch (error) { next(error) }
+})
+router.get('/reports', async (_req, res, next) => {
+  try { res.json(await listReports()) } catch (error) { next(error) }
+})
+router.put('/reports/:id', async (req, res, next) => {
+  try {
+    const parsed = reportUpdateInput.safeParse(req.body)
+    if (!parsed.success) return res.status(400).json({ error: 'Please check the report fields.', details: parsed.error.flatten() })
+    const report = await updateReport(req.params.id, parsed.data)
+    if (!report) return res.status(404).json({ error: 'Report not found.' })
+    req.app.get('io')?.emit('community:reports-updated')
+    res.json(report)
+  } catch (error) { next(error) }
+})
+router.delete('/reports', async (req, res, next) => {
+  try {
+    const result = await clearReports()
+    req.app.get('io')?.emit('community:reports-updated')
+    res.json({ success: true, ...result })
+  }
+  catch (error) { next(error) }
 })
 router.put('/users/:id/role', async (req, res, next) => {
   try {

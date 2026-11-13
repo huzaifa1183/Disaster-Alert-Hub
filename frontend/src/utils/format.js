@@ -1,4 +1,4 @@
-export const formatTime = (value) => new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value))
+export const formatTime = (value, locale = 'en-IN') => new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value))
 export const relativeTime = (value) => {
   const minutes = Math.max(0, Math.floor((Date.now() - new Date(value).getTime()) / 60000))
   if (minutes < 60) return `${minutes}m ago`

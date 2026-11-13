@@ -100,11 +100,44 @@ export async function listReports() {
   return isMongoConnected() ? Report.find().sort({ createdAt: -1 }).lean() : [...memory.reports].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
 }
 
+export async function listVerifiedReports() {
+  return isMongoConnected()
+    ? Report.find({ status: 'Verified' }).sort({ createdAt: -1 }).lean()
+    : memory.reports.filter((report) => report.status === 'Verified').sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+}
+
 export async function addReport(report) {
-  if (isMongoConnected()) return (await Report.create(report)).toObject()
-  const saved = { ...report, _id: crypto.randomUUID(), createdAt: new Date().toISOString() }
+  if (isMongoConnected()) return (await Report.create({ status: 'Pending', source: 'Citizen report', ...report })).toObject()
+  const createdAt = new Date().toISOString()
+  const saved = { ...report, status: report.status || 'Pending', source: report.source || 'Citizen report', _id: crypto.randomUUID(), createdAt, updatedAt: createdAt }
   memory.reports.unshift(saved)
   return saved
+}
+
+export async function updateReport(id, values) {
+  if (isMongoConnected()) {
+    if (!mongoose.isValidObjectId(id)) return null
+    return Report.findByIdAndUpdate(id, values, { new: true, runValidators: true }).lean()
+  }
+  const report = memory.reports.find((item) => item._id === id)
+  if (!report) return null
+  Object.assign(report, values, { updatedAt: new Date().toISOString() })
+  return report
+}
+
+export async function clearReports() {
+  if (isMongoConnected()) {
+    const [reports, notifications] = await Promise.all([
+      Report.deleteMany({}),
+      Notification.deleteMany({ type: 'report' }),
+    ])
+    return { reportsDeleted: reports.deletedCount || 0, notificationsDeleted: notifications.deletedCount || 0 }
+  }
+  const reportsDeleted = memory.reports.length
+  const reportNotifications = memory.notifications.filter((item) => item.type === 'report')
+  memory.reports = []
+  memory.notifications = memory.notifications.filter((item) => item.type !== 'report')
+  return { reportsDeleted, notificationsDeleted: reportNotifications.length }
 }
 
 export async function listDisasters() {

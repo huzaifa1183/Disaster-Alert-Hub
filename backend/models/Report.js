@@ -4,7 +4,7 @@ const reportSchema = new mongoose.Schema({
   text: { type: String, required: true, maxlength: 2000 },
   location: { type: String, default: '' },
   category: { type: String, default: 'Unknown' },
-  status: { type: String, enum: ['Pending', 'Reviewed'], default: 'Pending' },
+  status: { type: String, enum: ['Pending', 'Verified', 'Rejected', 'Reviewed'], default: 'Pending' },
   source: { type: String, default: 'Citizen report' },
 }, { timestamps: true })
 

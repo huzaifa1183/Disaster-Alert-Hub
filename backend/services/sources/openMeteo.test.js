@@ -18,6 +18,17 @@ function sampleResponse() {
       wind_speed_10m: 14.2,
       weather_code: 61,
     },
+    daily: {
+      time: [
+        '2026-11-12', '2026-11-13', '2026-11-14', '2026-11-15',
+        '2026-11-16', '2026-11-17', '2026-11-18',
+      ],
+      weather_code: [61, 3, 0, 2, 61, 3, 0],
+      temperature_2m_max: [30, 31, 32, 31, 29, 28, 30],
+      temperature_2m_min: [25, 26, 26, 25, 24, 23, 24],
+      precipitation_probability_max: [80, 10, 0, 20, 70, 30, 0],
+      precipitation_sum: [4.2, 0, 0, 0.1, 2.4, 0.2, 0],
+    },
   }
 }
 
@@ -28,6 +39,8 @@ test('requests only the required current fields and Indian timezone', () => {
     latitude: String(location.latitude),
     longitude: String(location.longitude),
     current: 'temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m,weather_code',
+    daily: 'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum',
+    forecast_days: '7',
     timezone: 'Asia/Kolkata',
   })
 })
@@ -40,6 +53,10 @@ test('normalizes the returned current values and preserves the API timestamp', (
   assert.equal(weather.current.condition, 'Slight rain')
   assert.equal(weather.current.time, sampleResponse().current.time)
   assert.equal(weather.current.windSpeedKmh, 14.2)
+  assert.equal(weather.dailyForecast.length, 7)
+  assert.equal(weather.dailyForecast[1].date, '2026-11-13')
+  assert.equal(weather.dailyForecast[1].condition, 'Overcast')
+  assert.equal(weather.dailyForecast[1].maximumTemperatureC, 31)
   assert.equal(weather.sourceUrl, sourceUrl)
   assert.equal(weather.source, 'Open-Meteo')
 })
